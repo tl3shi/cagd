@@ -75,7 +75,7 @@ IMPLEMENT_DYNCREATE(CtetrahedronView, CView)
 		glRotatef(angle, 0.5, 0.5, 0.5);
 		
 		glBegin(GL_TRIANGLES);
-		int a  = 5;
+		int a  = 3;
 		glColor3d(1, 0, 0);
 		glVertex3d(0, 0, 0);
 		glVertex3d(a, 0, 0);
