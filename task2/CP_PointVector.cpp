@@ -126,9 +126,11 @@ CP_Vector3D& CP_Vector3D::operator /= (double num)
 }
 CP_Vector3D& CP_Vector3D::operator ^= (const CP_Vector3D& v)
 {
-    m_x *= v.m_x;
-    m_y *= v.m_y;
-    m_z *= v.m_z;
+    CP_Vector3D temp;
+    temp.m_x = m_y * v.m_z - m_z * v.m_y;
+    temp.m_y = - (m_x * v.m_z - m_z * v.m_x);
+    temp.m_z = m_x * v.m_y - m_y * v.m_x;
+    return temp;
 }
 
 //单目减
@@ -272,9 +274,9 @@ extern double operator * (const CP_Vector3D& u, const CP_Vector3D& v) // 点积
 extern CP_Vector3D operator ^ (const CP_Vector3D& u, const CP_Vector3D& v) // 叉积
 {
     CP_Vector3D vector;
-    vector.m_x = u.m_x * v.m_x;
-    vector.m_z = u.m_z * v.m_z;
-    vector.m_y = u.m_y * v.m_y;
+    vector.m_x = u.m_z * v.m_y - v.m_z * u.m_y;
+    vector.m_z = u.m_x * v.m_z - v.m_x * u.m_z;
+    vector.m_y = u.m_y * v.m_x - v.m_y * u.m_x;
     return vector;
 }
 extern CP_Vector3D operator * (const CP_Vector3D& v, double num)
