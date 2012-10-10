@@ -54,7 +54,7 @@ CP_Vector2D& CP_Vector2D::operator /= (double num)
 }
 double CP_Vector2D::operator ^(const CP_Vector2D& v)
 {
-    return m_x * v.m_x + m_y * v.m_y;
+    return m_x * v.m_y - m_y * v.m_x;
 }
 //单目减
 CP_Vector2D CP_Vector2D::operator -() const
@@ -69,8 +69,8 @@ double CP_Vector2D::mf_getLength( ) const // 取长度
 CP_Vector2D CP_Vector2D::mf_getPerpendicularVector() const //得到一个垂直的向量
 {
     CP_Vector2D temp;
-    temp.m_x = 1;
-    temp.m_y = 1 / m_y * m_x;
+    temp.m_x = m_y;
+    temp.m_y = -m_x;
     temp.mf_normalize();
     return temp;
 }
@@ -104,17 +104,21 @@ CP_Vector3D& CP_Vector3D::operator += (const CP_Vector3D& v)
     m_x += v.m_x;
     m_y += v.m_y;
     m_z += v.m_z;
+	return *this;
 }
 CP_Vector3D& CP_Vector3D::operator -= (const CP_Vector3D& v)
-{ m_x -= v.m_x;
+{ 
+	m_x -= v.m_x;
     m_y -= v.m_y;
     m_z -= v.m_z;
+	return *this;
 }
 CP_Vector3D& CP_Vector3D::operator *= (double num)
 {
     m_x *= num;
     m_y *= num;
     m_z *= num;
+	return *this;
 }
 CP_Vector3D& CP_Vector3D::operator /= (double num)
 {
@@ -122,7 +126,8 @@ CP_Vector3D& CP_Vector3D::operator /= (double num)
     m_x /= num;
     m_y /= num;
     m_z /= num;
- 
+ 	
+ 	return *this;
 }
 CP_Vector3D& CP_Vector3D::operator ^= (const CP_Vector3D& v)
 {
@@ -130,7 +135,9 @@ CP_Vector3D& CP_Vector3D::operator ^= (const CP_Vector3D& v)
     temp.m_x = m_y * v.m_z - m_z * v.m_y;
     temp.m_y = - (m_x * v.m_z - m_z * v.m_x);
     temp.m_z = m_x * v.m_y - m_y * v.m_x;
-    return temp;
+    *this = temp;
+    return *this;
+
 }
 
 //单目减
@@ -145,7 +152,7 @@ double CP_Vector3D::mf_getLength () const // 取长度
 }
 CP_Vector3D CP_Vector3D::mf_getPerpendicularVector( ) const //得到一个垂直的向量
 {
-    //TODO
+    return CP_Vector3D(m_y + m_z, m_z - m_x, -m_y - m_x);
 }
 
 void CP_Vector3D::mf_normalize() // 单位化
