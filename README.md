@@ -10,4 +10,4 @@ Computer Aided Geometric Modeling
 
 * task2: 正四面体
 
-
+* task3: Bezier曲线
