@@ -19,7 +19,17 @@
 #define new DEBUG_NEW
 #endif
 
+#include <algorithm>
+#include <vector>
+#include <math.h>
+using namespace std;
 
+
+vector<CP_Vector2D> ctrlPoints;//vector模拟点，de Casteljau算法时方便计算
+bool isReady = false;//鼠标双击后开始画bezier曲线，否则用虚线画控制点轨迹
+CP_Vector2D hoverPoint;//记录即将选择的控制点坐标
+const int besierSegment = 30;//分为多少段
+bool firstClick = false;//有第一个点后才开始记录 mouse坐标，生成虚线
 // COpenGLDemoView
 
 IMPLEMENT_DYNCREATE(COpenGLDemoView, CView)
@@ -31,10 +41,13 @@ BEGIN_MESSAGE_MAP(COpenGLDemoView, CView)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &COpenGLDemoView::OnFilePrintPreview)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
+	ON_WM_LBUTTONUP()
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
 	ON_WM_SIZE()
+	ON_WM_MOUSEMOVE()
 	ON_WM_ERASEBKGND()
+	ON_WM_LBUTTONDBLCLK()
 END_MESSAGE_MAP()
 
 // COpenGLDemoView 构造/析构
@@ -56,13 +69,6 @@ BOOL COpenGLDemoView::PreCreateWindow(CREATESTRUCT& cs)
 
 	return CView::PreCreateWindow(cs);
 }
-void drawOneLine(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2)
-{
-	glBegin(GL_LINES); 
-	glVertex2f(x1, y1); 
-	glVertex2f(x2, y2); 
-	glEnd();
-}
 
 CP_Vector2D getBezierPoint(CP_Vector2D controlPoints[], double t, int i, int j)
 {
@@ -73,20 +79,18 @@ CP_Vector2D getBezierPoint(CP_Vector2D controlPoints[], double t, int i, int j)
 	return getBezierPoint(controlPoints, t, i-1, j-1) * (1-t)+ getBezierPoint(controlPoints, t, i, j-1) * t;
 }
 
-void COpenGLDemoView::OnDraw(CDC* pDC)
+CP_Vector2D getBezierPoint(vector<CP_Vector2D> controlPoints, double t, int i, int j)
 {
-	COpenGLDemoDoc* pDoc = GetDocument();
-	ASSERT_VALID(pDoc);
-	if (!pDoc)
-		return;
-    wglMakeCurrent(pDC->m_hDC, m_hRC);
-    
-	glClearColor(0,1,1,1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glColor3f(1.0, 0.0, 0.0); // 红色
-    glLoadIdentity();
-    
+	if (j == 0)
+	{
+		return controlPoints[i];
+	}
+	return getBezierPoint(controlPoints, t, i-1, j-1) * (1-t)+ getBezierPoint(controlPoints, t, i, j-1) * t;
+}
+//demo 单位阵
+void drawBizerSample()
+{
+	glTranslated(-8.0, 0.0, 0.0);    
 	const int maxControlPoint = 4;
 	CP_Vector2D controlPoints[maxControlPoint];
 	controlPoints[0] = CP_Vector2D(0.0, 0.0);
@@ -100,19 +104,63 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
 	msg.Format(L"x=%f,y=%f", p.m_x, p.m_y);
 	MessageBox(_T(" " + msg));
 	*/
-	int segment = 5;	
 		
-	glBegin(GL_LINES);
+	glBegin(GL_LINE_STRIP);
 	double t = 0;
-	for (int i = 0; i < segment; i++)
+	for (int i = 0; i < besierSegment; i++)
 	{
-		t += 1/segment;
+		t += 1.0/besierSegment;
 		CP_Vector2D p = getBezierPoint(controlPoints, t, 3, 3);
 		glVertex2d(p.m_x, p.m_y);
 	}
 	glEnd();
 	glFlush();
-	
+}
+
+void COpenGLDemoView::OnDraw(CDC* pDC)
+{
+	COpenGLDemoDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	if (!pDoc)
+		return;
+    wglMakeCurrent(pDC->m_hDC, m_hRC);
+    
+	glClearColor(1,1,1,1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glPushMatrix();
+	//drawBizerSample();
+	//glPopMatrix();
+    //glLoadIdentity();
+	if(isReady)
+	{
+		glColor3f(1.0, 0.0, 0.0);
+		//bazier
+		glBegin(GL_LINE_STRIP);
+		double t = 0;
+		for (unsigned int i = 0; i < besierSegment; i++)
+		{
+			t += 1.0/besierSegment;
+			CP_Vector2D p = getBezierPoint(ctrlPoints, t, ctrlPoints.size()-1, ctrlPoints.size()-1 );
+			glVertex2d(p.m_x, p.m_y);
+		}
+		glEnd();
+		glFlush();
+	}else{
+		glBegin(GL_LINE_STRIP);
+		glColor3f(0.0, 0.0, 1.0);
+		for (unsigned int i = 0; i < ctrlPoints.size(); i++)
+		{	
+			//CP_Vector2D p = ctrlPoints[i];
+			//CString msg;
+			//msg.Format(L"x=%f,y=%f", p.m_x, p.m_y);
+			//MessageBox(_T(" " + msg));
+			glVertex2d(ctrlPoints[i].m_x, ctrlPoints[i].m_y);
+		}
+		glEnd();
+		glFlush();
+
+	}
+
 	SwapBuffers(pDC->m_hDC);
 	wglMakeCurrent(NULL, NULL);
 
@@ -146,19 +194,27 @@ void COpenGLDemoView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 	// TODO: 添加打印后进行的清理过程
 }
 
-void COpenGLDemoView::OnRButtonUp(UINT /* nFlags */, CPoint point)
+void COpenGLDemoView::OnRButtonUp(UINT nflags, CPoint point)
 {
-	ClientToScreen(&point);
-	OnContextMenu(this, point);
-}
+	isReady = true;
+	CRect rect;
+	GetClientRect(&rect);
+	int x = point.x;
+	int y = rect.Height() - point.y;
 
-void COpenGLDemoView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
+	CP_Vector2D p = CP_Vector2D(x, y);
+	ctrlPoints.push_back(p);
+	Invalidate(TRUE);
+	CView::OnRButtonUp(nflags, point);
+}
+/*
+void COpenGLDemoView::OnContextMenu(CWnd*   pWnd  , CPoint point)
 {
 #ifndef SHARED_HANDLERS
 	theApp.GetContextMenuManager()->ShowPopupMenu(IDR_POPUP_EDIT, point.x, point.y, this, TRUE);
 #endif
 }
-
+*/
 
 // COpenGLDemoView 诊断
 
@@ -231,6 +287,8 @@ int COpenGLDemoView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// to this view. You can't use OpenGL in MFC without using the handle
 	// that this function returns
 	m_hRC = wglCreateContext(dc.m_hDC);
+
+	MessageBox(L"鼠标左键选择控制点位置，右键生成画bezier曲线");
 	return 0;
 }
 
@@ -245,7 +303,8 @@ void COpenGLDemoView::OnDestroy()
 	// Delete the handle to an OpenGL rendering context 
 	wglDeleteContext(m_hRC);
 	m_hRC=NULL;
-
+	//TODO how?
+	//delete vector<CP_Vector2D *> ctrlPoints;
 
 }
 
@@ -255,16 +314,12 @@ void COpenGLDemoView::OnSize(UINT nType, int cx, int cy)
 	CView::OnSize(nType, cx, cy);
 	CClientDC dc(this);
 	wglMakeCurrent(dc.m_hDC, m_hRC);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
-	double d=10;
-	double n=100;
-
-	glOrtho(-cx/n, cx/n, -cy/n, cy/n, -d, d);
-
+	
+	glViewport(0, 0, (GLsizei)cx, (GLsizei)cy);
 	glMatrixMode(GL_MODELVIEW);
-	glViewport(0, 0, cx, cy);
+	glLoadIdentity();
+	gluOrtho2D(0.0, (GLdouble)cx, 0.0, (GLdouble)cy);
+	
 	wglMakeCurrent(NULL, NULL);
 
 }
@@ -275,4 +330,47 @@ BOOL COpenGLDemoView::OnEraseBkgnd(CDC* pDC)
 
 	//return CView::OnEraseBkgnd(pDC);
 	return TRUE;
+}
+
+//本来想写个鼠标移动，实时有个虚线条 把控制点连接起来的
+void COpenGLDemoView::OnMouseMove(UINT nFlags, CPoint point)
+{
+	/*
+	if(!firstClick)
+		return;
+
+	CRect rect;
+	GetClientRect(&rect);
+	int x = point.x;
+	int y = rect.Height() - point.y;
+
+	hoverPoint = CP_Vector2D(x, y);
+	*/
+	CView::OnMouseMove(nFlags, point);
+}
+
+void COpenGLDemoView::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	
+	if (ctrlPoints.size() >= 10){
+		MessageBox(L"递归算法比较垃圾，控制点多了，难得等哦……就不再加了哈");
+		return ;
+	}
+
+	CRect rect;
+	GetClientRect(&rect);
+	int x = point.x;
+	int y = rect.Height() - point.y;
+
+	CP_Vector2D p = CP_Vector2D(x, y);
+	ctrlPoints.push_back(p);
+	Invalidate(TRUE);
+	isReady = false;
+	
+	CView::OnLButtonUp(nFlags, point);
+}
+
+void COpenGLDemoView::OnLButtonDblClk(UINT nFlags, CPoint point)
+{
+	
 }
