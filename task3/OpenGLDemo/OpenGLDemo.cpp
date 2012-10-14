@@ -169,17 +169,28 @@ public:
 // 对话框数据
 	enum { IDD = IDD_ABOUTBOX };
 
+	CBrush m_brush;
+	COLORREF m_color;
+
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
 
 // 实现
 protected:
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnBnClickedOk();
+	afx_msg void OnClickedStaticLink();
+	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
+	virtual BOOL OnInitDialog();
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	afx_msg void OnPaint();
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(CAboutDlg::IDD)
 {
 }
+
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -187,6 +198,11 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
+	ON_BN_CLICKED(IDOK, &CAboutDlg::OnBnClickedOk)
+	ON_STN_CLICKED(IDC_STATIC_LINK, &CAboutDlg::OnClickedStaticLink)
+	ON_WM_SETCURSOR()
+	ON_WM_CTLCOLOR()
+	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
 // 用于运行对话框的应用程序命令
@@ -220,5 +236,78 @@ void COpenGLDemoApp::SaveCustomState()
 
 // COpenGLDemoApp 消息处理程序
 
+void CAboutDlg::OnBnClickedOk()
+{
+	CDialogEx::OnOK();
+}
 
 
+void CAboutDlg::OnClickedStaticLink()
+{
+	ShellExecute(m_hWnd, NULL, _T("http://www.tanglei.name"),NULL, NULL, SW_SHOWMAXIMIZED); 
+}
+
+
+BOOL CAboutDlg::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
+	
+	CRect rcStatic_blog;  
+    CPoint ptCursor;  
+      
+    GetDlgItem(IDC_STATIC_LINK)->GetWindowRect(rcStatic_blog);  
+    GetCursorPos(&ptCursor);  
+      
+    if (rcStatic_blog.PtInRect (ptCursor))  
+    {  
+        HICON hIconBang=LoadCursor(NULL, IDC_HAND);  
+        SetCursor(hIconBang);  
+  
+        return TRUE;  
+    }  
+    else  
+    {  
+        return CDialog::OnSetCursor(pWnd, nHitTest, message);  
+    }  
+	return CDialogEx::OnSetCursor(pWnd, nHitTest, message);
+}
+
+
+BOOL CAboutDlg::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+
+	//此处设置的RGB值可以改变控件的背景色。
+	//m_brush.CreateSolidBrush(RGB(255,255,255));
+
+	//此处设置控件的文字初始颜色。
+	m_color = RGB(0,0,0);
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+}
+
+
+HBRUSH CAboutDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	if(nCtlColor== CTLCOLOR_STATIC)
+	{
+		//pDC->SetBkMode(TRANSPARENT);
+		pDC->SetTextColor(m_color);
+		return (HBRUSH)m_brush.GetSafeHandle();
+	}
+	return hbr;
+}
+
+
+void CAboutDlg::OnPaint()
+{
+	CPaintDC dc(this); // device context for painting
+	
+	m_color=RGB(128,0,255);//此处改变字体的颜色 
+	CStatic* m_pStatic1=(CStatic*)GetDlgItem(IDC_STATIC_LINK); 
+	m_pStatic1->RedrawWindow(); 
+	m_color = RGB(0,0,0);	
+	CDialogEx::OnPaint();
+}
