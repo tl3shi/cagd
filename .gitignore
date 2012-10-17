@@ -4,6 +4,9 @@ Debug/*
 *.suo
 *.exe
 *.swp
+#Binary version of the current resource script file;used for quick loading.
+*.aps
+thumbs.db
 
 # Compiled Object files
 *.slo
