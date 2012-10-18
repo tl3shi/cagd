@@ -88,10 +88,31 @@ CP_Vector2D getBezierPoint(vector<CP_Vector2D> controlPoints, double t, int i, i
 	}
 	return getBezierPoint(controlPoints, t, i-1, j-1) * (1-t)+ getBezierPoint(controlPoints, t, i, j-1) * t;
 }
+/************************************************************************/
+/* B(i,n t) = n!/(i!(n-i)!) t^i (1-t)*n-i                                                                     */
+/************************************************************************/
+double B(int i, int n, double t)
+{
+	double result = .1;
+	for (unsigned j = n; j > n-i ; j-- ){
+		result*=n;
+	}
+	for (unsigned j = i; j > 1; j--){
+		result /= i;
+	}
+	for(unsigned j = 1; j <= i; j++){
+		result *= t;
+	}
+	for(unsigned j = n ;j >= n-i; j--){
+		result *= (1 - t);
+	}
+	return result;
+}
+
 //demo 单位阵
 void drawBizerSample()
 {
-	glTranslated(-8.0, 0.0, 0.0);    
+	//glTranslated(-8.0, 0.0, 0.0);    
 	const int maxControlPoint = 4;
 	CP_Vector2D controlPoints[maxControlPoint];
 	controlPoints[0] = CP_Vector2D(0.0, 0.0);
@@ -103,17 +124,30 @@ void drawBizerSample()
 	CP_Vector2D p = getBezierPoint(controlPoints, 0.33333, 3, 3);
 	CString msg;
 	msg.Format(L"x=%f,y=%f", p.m_x, p.m_y);
-	MessageBox(_T(" " + msg));
+	AfxMessageBox(_T(" " + msg));
 	*/
-		
+	glColor3d(1.0, 0, 0);
 	glBegin(GL_LINE_STRIP);
 	double t = 0;
 	for (int i = 0; i < besierSegment; i++)
 	{
 		t += 1.0/besierSegment;
 		CP_Vector2D p = getBezierPoint(controlPoints, t, 3, 3);
-		glVertex2d(p.m_x, p.m_y);
+		glVertex2d(p.m_x / 10, p.m_y / 10);
 	}
+	glEnd();
+
+	glTranslated(-8.0, 0.0, 0.0);   
+	glColor3d(1.0, 0, 0);
+	glBegin(GL_LINE_STRIP);
+	double t = 0;
+	for (int i = 0; i < besierSegment; i++)
+	{
+		t += 1.0/besierSegment;
+		CP_Vector2D p = getBezierPoint(controlPoints, t, 3, 3);
+		glVertex2d(p.m_x / 10, p.m_y / 10);
+	}
+
 	glEnd();
 	glFlush();
 }
@@ -129,49 +163,8 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
 	glClearColor(1,1,1,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-    // *************************************************
-    // Setting lights and materials begins
-    // 设置光源与材料
-    GLfloat material_ambient  [ ] = { 0.2f, 0.2f, 0.2f, 0.2f };
-    GLfloat material_diffuse  [ ] = { 0.2f, 0.8f, 0.4f, 0.8f };
-    GLfloat material_specular [ ] = { 0.2f, 0.8f, 0.4f, 0.8f };
-    GLfloat material_emission [ ] = { 0.2f, 0.2f, 0.2f, 1.0f };
-    GLfloat material_shininess[ ] = { 20.0f };
-    glMaterialfv(GL_FRONT, GL_AMBIENT,  material_ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE,  material_diffuse);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, material_specular);
-    glMaterialfv(GL_FRONT, GL_EMISSION, material_emission);
-    glMaterialfv(GL_FRONT, GL_SHININESS,material_shininess);
-		
-    GLfloat light_position [ ] = { 1.0f, 1.0f, 1.0f, 0.0f };
-    GLfloat light_ambient  [ ] = { 0.2f, 0.2f, 0.2f, 0.2f };
-    GLfloat light_diffuse  [ ] = { 0.5f, 0.5f, 0.5f, 0.2f };
-    GLfloat light_specular [ ] = { 0.5f, 0.5f, 0.5f, 0.2f };
-    glLightfv(GL_LIGHT0, GL_POSITION,  light_position);
-    glLightfv(GL_LIGHT0, GL_AMBIENT,   light_ambient);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE,   light_diffuse);
-    glLightfv(GL_LIGHT0, GL_SPECULAR,  light_specular);
-
-    glEnable (GL_COLOR_MATERIAL);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glEnable(GL_AUTO_NORMAL);
-    glEnable (GL_NORMALIZE);
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc (GL_LESS);
-    // Setting lights and materials ends
-    // ****************************************************
-
-    glLoadIdentity();
-    CP_Sphere a;
-    glTranslated(-5.0, 0.0, 0.0);
-    glColor3f(1.0, 0.0, 0.0); // 红色
-    a.mf_drawSolid(false);
-    glTranslated(5.0, 0.0, 0.0);
-    a.mf_drawSolid(true);
-    glTranslated(5.0, 0.0, 0.0);
-    glColor3f(0.0, 0.0, 1.0); // 蓝色
-    a.mf_drawWireframe( );
+	glLoadIdentity();
+	drawBizerSample();
 	
 	SwapBuffers(pDC->m_hDC);
 	wglMakeCurrent(NULL, NULL);
@@ -325,14 +318,25 @@ void COpenGLDemoView::OnSize(UINT nType, int cx, int cy)
 	CView::OnSize(nType, cx, cy);
 	CClientDC dc(this);
 	wglMakeCurrent(dc.m_hDC, m_hRC);
-	
+	/*
+	glViewport(0, 0, (GLsizei)cx, (GLsizei)cy);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	double n = 100;
-	gluOrtho2D(-cx/n, cx/n, -cy/n, cy/n);
+	//gluOrtho2D(-cx/n, cx/n, -cy/n, cy/n);
+	gluOrtho2D(0, cx, 0, cy);
 	//glOrtho(-cx/n, cx/n, -cy/n, cy/n, -d, d);
 	glMatrixMode(GL_MODELVIEW);
+	
+	//glViewport(0, 0, (GLsizei)cx, (GLsizei)cy);
+	*/
+	
 	glViewport(0, 0, (GLsizei)cx, (GLsizei)cy);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	gluOrtho2D(0.0, (GLdouble)cx, 0.0, (GLdouble)cy);
+	
+
 	wglMakeCurrent(NULL, NULL);
 
 }

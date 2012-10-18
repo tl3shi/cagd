@@ -163,7 +163,9 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
 		}
 		glEnd();
 		glFlush();
-	}else{
+	}
+	//else //control points also show
+	{
 		glBegin(GL_LINE_STRIP);
 		glColor3f(0.0, 0.0, 1.0);
 		for (unsigned int i = 0; i < ctrlPoints.size(); i++)
