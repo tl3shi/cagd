@@ -101,23 +101,38 @@ CP_Vector2D getBezierPointNotRecurrent(vector<CP_Vector2D> controlPoints, double
 	return tempPoints[0];
 }
 
+/************************************************************************/
+/* B(i,n t) = n!/(i!(n-i)!) t^i (1-t)*n-i  
+*	n: 控制点数量-1 
+	i:控制点序号
+	t:参数
+/************************************************************************/
+double B(int i, int n, double t)
+{
+	assert (n >= i);
+	assert (t >= 0);
+	assert (t <= 1);
+	double result = 1;
+	for (unsigned j = n; j > n-i ; j-- ){
+		result*=j;
+	}
+	for (unsigned j = i; j > 1; j--){
+		result /= j;
+	}
+	result = result * pow(t, i) * pow(1-t, n-i);
+	return result;
+}
 //demo 单位阵
 void drawBizerSample()
 {
-	//glTranslated(-8.0, 0.0, 0.0);    
 	const int maxControlPoint = 4;
 	CP_Vector2D controlPoints[maxControlPoint];
 	controlPoints[0] = CP_Vector2D(0.0, 0.0);
 	controlPoints[1] = CP_Vector2D(1.0, 3.0);
 	controlPoints[2] = CP_Vector2D(2.0, 1.0);
 	controlPoints[3] = CP_Vector2D(3.0, 3.0);
-	
-	/*
-	CP_Vector2D p = getBezierPoint(controlPoints, 0.33333, 3, 3);
-	CString msg;
-	msg.Format(L"x=%f,y=%f", p.m_x, p.m_y);
-	AfxMessageBox(_T(" " + msg));
-	*/
+
+	glLoadIdentity();
 	glColor3d(1.0, 0, 0);
 	glBegin(GL_LINE_STRIP);
 	double t = 0;
@@ -159,10 +174,11 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
     
 	glClearColor(1,1,1,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//glPushMatrix();
-	//drawBizerSample();
-	//glPopMatrix();
-    //glLoadIdentity();
+	
+	glPushMatrix();
+	drawBizerSample();
+	glPopMatrix();
+
 	if(isReady)
 	{
 		glColor3f(1.0, 0.0, 0.0);
