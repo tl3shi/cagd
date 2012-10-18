@@ -89,23 +89,24 @@ CP_Vector2D getBezierPoint(vector<CP_Vector2D> controlPoints, double t, int i, i
 	return getBezierPoint(controlPoints, t, i-1, j-1) * (1-t)+ getBezierPoint(controlPoints, t, i, j-1) * t;
 }
 /************************************************************************/
-/* B(i,n t) = n!/(i!(n-i)!) t^i (1-t)*n-i                                                                     */
+/* B(i,n t) = n!/(i!(n-i)!) t^i (1-t)*n-i  
+*	n: 控制点数量-1 
+	i:控制点序号
+	t:参数
 /************************************************************************/
 double B(int i, int n, double t)
 {
-	double result = .1;
+	assert (n >= i);
+	assert (t >= 0);
+	assert (t <= 1);
+	double result = 1;
 	for (unsigned j = n; j > n-i ; j-- ){
-		result*=n;
+		result*=j;
 	}
 	for (unsigned j = i; j > 1; j--){
-		result /= i;
+		result /= j;
 	}
-	for(unsigned j = 1; j <= i; j++){
-		result *= t;
-	}
-	for(unsigned j = n ;j >= n-i; j--){
-		result *= (1 - t);
-	}
+	result = result * pow(t, i) * pow(1-t, n-i);
 	return result;
 }
 
@@ -129,22 +130,28 @@ void drawBizerSample()
 	glColor3d(1.0, 0, 0);
 	glBegin(GL_LINE_STRIP);
 	double t = 0;
-	for (int i = 0; i < besierSegment; i++)
+	for (unsigned int i = 0; i < besierSegment; i++)
 	{
 		t += 1.0/besierSegment;
 		CP_Vector2D p = getBezierPoint(controlPoints, t, 3, 3);
 		glVertex2d(p.m_x / 10, p.m_y / 10);
 	}
 	glEnd();
-
-	glTranslated(-8.0, 0.0, 0.0);   
-	glColor3d(1.0, 0, 0);
+	
+	glLoadIdentity();
+	glTranslated(-0.5, 0.0, 0.0);   
+	glColor3d(1.0, 0, 1.0);
 	glBegin(GL_LINE_STRIP);
-	double t = 0;
-	for (int i = 0; i < besierSegment; i++)
+	t = 0;
+	for (unsigned int i = 0; i < besierSegment; i++)
 	{
 		t += 1.0/besierSegment;
-		CP_Vector2D p = getBezierPoint(controlPoints, t, 3, 3);
+		CP_Vector2D p;
+		for (unsigned kk = 0 ; kk < maxControlPoint; kk++) 
+		{
+			p += controlPoints[kk] * B(kk, 3, t);
+		}
+
 		glVertex2d(p.m_x / 10, p.m_y / 10);
 	}
 

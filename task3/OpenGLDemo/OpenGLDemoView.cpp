@@ -104,7 +104,7 @@ CP_Vector2D getBezierPointNotRecurrent(vector<CP_Vector2D> controlPoints, double
 //demo µ•Œª’Û
 void drawBizerSample()
 {
-	glTranslated(-8.0, 0.0, 0.0);    
+	//glTranslated(-8.0, 0.0, 0.0);    
 	const int maxControlPoint = 4;
 	CP_Vector2D controlPoints[maxControlPoint];
 	controlPoints[0] = CP_Vector2D(0.0, 0.0);
@@ -116,21 +116,39 @@ void drawBizerSample()
 	CP_Vector2D p = getBezierPoint(controlPoints, 0.33333, 3, 3);
 	CString msg;
 	msg.Format(L"x=%f,y=%f", p.m_x, p.m_y);
-	MessageBox(_T(" " + msg));
+	AfxMessageBox(_T(" " + msg));
 	*/
-		
+	glColor3d(1.0, 0, 0);
 	glBegin(GL_LINE_STRIP);
 	double t = 0;
-	for (int i = 0; i < besierSegment; i++)
+	for (unsigned int i = 0; i < besierSegment; i++)
 	{
 		t += 1.0/besierSegment;
 		CP_Vector2D p = getBezierPoint(controlPoints, t, 3, 3);
-		glVertex2d(p.m_x, p.m_y);
+		glVertex2d(p.m_x / 10, p.m_y / 10);
 	}
+	glEnd();
+	
+	glLoadIdentity();
+	glTranslated(-0.5, 0.0, 0.0);   
+	glColor3d(1.0, 0, 1.0);
+	glBegin(GL_LINE_STRIP);
+	t = 0;
+	for (unsigned int i = 0; i < besierSegment; i++)
+	{
+		t += 1.0/besierSegment;
+		CP_Vector2D p;
+		for (unsigned kk = 0 ; kk < maxControlPoint; kk++) 
+		{
+			p += controlPoints[kk] * B(kk, 3, t);
+		}
+
+		glVertex2d(p.m_x / 10, p.m_y / 10);
+	}
+
 	glEnd();
 	glFlush();
 }
-
 void COpenGLDemoView::OnDraw(CDC* pDC)
 {
 	COpenGLDemoDoc* pDoc = GetDocument();
