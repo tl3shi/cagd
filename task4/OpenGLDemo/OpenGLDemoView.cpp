@@ -1,4 +1,3 @@
-
 // OpenGLDemoView.cpp : COpenGLDemoView 类的实现
 //
 
@@ -29,8 +28,11 @@ using namespace std;
 vector<CP_Vector2D> ctrlPoints;//vector模拟点，de Casteljau算法时方便计算
 bool isReady = false;//鼠标双击后开始画bezier曲线，否则用虚线画控制点轨迹
 CP_Vector2D hoverPoint;//记录即将选择的控制点坐标
-const int besierSegment = 30;//分为多少段
+int besierSegment = 30;//分为多少段
 bool firstClick = false;//有第一个点后才开始记录 mouse坐标，生成虚线
+const int MAXCTRPOINT = 10;
+bool enableMaxCtrlPoint = false;
+
 // COpenGLDemoView
 
 IMPLEMENT_DYNCREATE(COpenGLDemoView, CView)
@@ -50,6 +52,8 @@ BEGIN_MESSAGE_MAP(COpenGLDemoView, CView)
 	ON_WM_ERASEBKGND()
 	ON_WM_LBUTTONDBLCLK()
 END_MESSAGE_MAP()
+
+void initLights();
 
 // COpenGLDemoView 构造/析构
 
@@ -88,6 +92,27 @@ CP_Vector2D getBezierPoint(vector<CP_Vector2D> controlPoints, double t, int i, i
 	}
 	return getBezierPoint(controlPoints, t, i-1, j-1) * (1-t)+ getBezierPoint(controlPoints, t, i, j-1) * t;
 }
+
+CP_Vector2D getBezierPointNotRecurrent(vector<CP_Vector2D> controlPoints, double t)
+{
+	vector<CP_Vector2D> tempPoints(controlPoints);
+	for (unsigned int i = 1; i <= tempPoints.size(); i++){
+		for (unsigned int j = 0; j < tempPoints.size()-i; j++)
+			tempPoints[j] = tempPoints[j] * (1-t) + tempPoints[j+1] * t; 
+	}
+	return tempPoints[0];
+}
+
+CP_Vector3D getBezierPointNotRecurrent(vector<CP_Vector3D> controlPoints, double t)
+{
+	vector<CP_Vector3D> tempPoints(controlPoints);
+	for (unsigned int i = 1; i <= tempPoints.size(); i++){
+		for (unsigned int j = 0; j < tempPoints.size()-i; j++)
+			tempPoints[j] = tempPoints[j] * (1-t) + tempPoints[j+1] * t; 
+	}
+	return tempPoints[0];
+}
+
 /************************************************************************/
 /* B(i,n t) = n!/(i!(n-i)!) t^i (1-t)*n-i  
 *	n: 控制点数量-1 
@@ -109,24 +134,17 @@ double B(int i, int n, double t)
 	result = result * pow(t, i) * pow(1-t, n-i);
 	return result;
 }
-
 //demo 单位阵
 void drawBizerSample()
 {
-	//glTranslated(-8.0, 0.0, 0.0);    
 	const int maxControlPoint = 4;
 	CP_Vector2D controlPoints[maxControlPoint];
 	controlPoints[0] = CP_Vector2D(0.0, 0.0);
 	controlPoints[1] = CP_Vector2D(1.0, 3.0);
 	controlPoints[2] = CP_Vector2D(2.0, 1.0);
 	controlPoints[3] = CP_Vector2D(3.0, 3.0);
-	
-	/*
-	CP_Vector2D p = getBezierPoint(controlPoints, 0.33333, 3, 3);
-	CString msg;
-	msg.Format(L"x=%f,y=%f", p.m_x, p.m_y);
-	AfxMessageBox(_T(" " + msg));
-	*/
+
+	glLoadIdentity();
 	glColor3d(1.0, 0, 0);
 	glBegin(GL_LINE_STRIP);
 	double t = 0;
@@ -134,7 +152,7 @@ void drawBizerSample()
 	{
 		t += 1.0/besierSegment;
 		CP_Vector2D p = getBezierPoint(controlPoints, t, 3, 3);
-		glVertex2d(p.m_x / 10, p.m_y / 10);
+		glVertex2d(p.m_x, p.m_y);
 	}
 	glEnd();
 	
@@ -152,11 +170,209 @@ void drawBizerSample()
 			p += controlPoints[kk] * B(kk, 3, t);
 		}
 
-		glVertex2d(p.m_x / 10, p.m_y / 10);
+		glVertex2d(p.m_x, p.m_y);
 	}
 
 	glEnd();
+	glFlush(); 
+}
+
+void drawBezierSurfaceDemo()
+{
+	initLights();
+
+	vector<CP_Vector3D> controlPoints[4];
+	controlPoints[0].push_back( CP_Vector3D(-1.5, -1.5, 4.0));
+	controlPoints[0].push_back( CP_Vector3D(-0.5, -1.5, 2.0));
+	controlPoints[0].push_back( CP_Vector3D(0.5, -1.5, -1.0));
+	controlPoints[0].push_back( CP_Vector3D(1.5, -1.5, 2.0));
+	
+	controlPoints[1].push_back(CP_Vector3D(-1.5, -0.5, 1.0));
+	controlPoints[1].push_back(CP_Vector3D(-0.5, -0.5, 3.0));
+	controlPoints[1].push_back(CP_Vector3D(0.5, -0.5,  0.0));
+	controlPoints[1].push_back(CP_Vector3D(1.5, -0.5, -1.0));
+
+	controlPoints[2].push_back(CP_Vector3D(-1.5, 0.5, 4.0));
+	controlPoints[2].push_back(CP_Vector3D(-0.5, 0.5, 0.0));
+	controlPoints[2].push_back(CP_Vector3D(0.5, 0.5, 3.0));
+	controlPoints[2].push_back(CP_Vector3D(1.5, 0.5, 4.0));
+	
+	controlPoints[3].push_back(CP_Vector3D(-1.5, 1.5, -2.0));
+	controlPoints[3].push_back(CP_Vector3D(-0.5, 1.5, -2.0));
+	controlPoints[3].push_back(CP_Vector3D(0.5, 1.5, 0.0));
+	controlPoints[3].push_back(CP_Vector3D(1.5, 1.5, -1.0));
+	
+	/*
+	CP_Vector3D ctrlpoints[4][4] = 
+	{
+	   {  CP_Vector3D(-1.5, -1.5, 4.0),
+	      CP_Vector3D(-0.5, -1.5, 2.0),
+	      CP_Vector3D(0.5, -1.5, -1.0),
+	      CP_Vector3D(1.5, -1.5, 2.0)
+	   },
+	   { CP_Vector3D(-1.5, -0.5, 1.0),
+	     CP_Vector3D(-0.5, -0.5, 3.0),
+	     CP_Vector3D(0.5, -0.5,  0.0),
+		 CP_Vector3D(1.5, -0.5, -1.0)
+	   },
+	   { CP_Vector3D(-1.5, 0.5, 4.0),
+	     CP_Vector3D(-0.5, 0.5, 0.0),
+	     CP_Vector3D(0.5, 0.5, 3.0),
+		 CP_Vector3D(1.5, 0.5, 4.0)
+	   },
+	   { CP_Vector3D(-1.5, 1.5, -2.0),
+	     CP_Vector3D(-0.5, 1.5, -2.0),
+	     CP_Vector3D(0.5, 1.5, 0.0),
+		 CP_Vector3D(1.5, 1.5, -1.0)
+	   }
+	};
+	*/
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);     // 设置深度方程
+	glLoadIdentity();
+	glRotated(65,1,1,1);
+	glColor3d(1.0, 0, 0);
+	//把控制定点画出来
+	unsigned int i=0, j=0;
+	for(i=0;i<4;i++) {      // 绘制水平线
+		glBegin(GL_LINE_STRIP);
+		for(j=0;j<4;j++)
+			glVertex3d(controlPoints[i][j].m_x, controlPoints[i][j].m_y, controlPoints[i][j].m_z);
+		glEnd();
+	}
+	
+	for(i=0;i<4;i++) {      // 绘制垂直线
+		glBegin(GL_LINE_STRIP);
+		for(j=0;j<4;j++)
+			glVertex3d(controlPoints[j][i].m_x, controlPoints[j][i].m_y, controlPoints[j][i].m_z);
+		glEnd();
+	}
+	
+	double t = 0;
+/*	
+	vector<CP_Vector3D> last,temp;
+	temp.push_back(controlPoints[0][3]);
+	temp.push_back(controlPoints[1][3]);
+	temp.push_back(controlPoints[2][3]);
+	temp.push_back(controlPoints[3][3]);
+	for(unsigned int v = 0; v < besierSegment; v++)
+	{
+		t = v / besierSegment;
+		CP_Vector3D p = getBezierPointNotRecurrent(temp ,t);
+		last.push_back(p);
+	}
+*/
+	besierSegment = 200;
+	for (unsigned int u = 0; u < besierSegment; u++)
+	{
+		t = u * 1.0 / besierSegment;
+		vector<CP_Vector3D> newControl;
+		for (unsigned int k = 0; k < 4; k++)
+		{
+			CP_Vector3D p = getBezierPointNotRecurrent(controlPoints[k], t);
+			newControl.push_back(p);
+			//glVertex2d(p.m_x / 10, p.m_y / 10);
+		}
+		
+		glBegin(GL_LINE_STRIP);
+		for (unsigned int v = 0; v < besierSegment; v++)
+		{
+			t = v * 1.0 / besierSegment;
+//			glVertex3d(last[v].m_x, last[v].m_y, last[v].m_z);
+			CP_Vector3D p = getBezierPointNotRecurrent(newControl, t);
+			glVertex3d(p.m_x / 1.0, p.m_y / 1.0, p.m_z / 1.0);
+		}
+	}
+	
+	glEnd();
 	glFlush();
+
+}
+void initLights()
+{
+    // *************************************************
+    // Setting lights and materials begins
+    // 设置光源与材料
+    GLfloat material_ambient  [ ] = { 0.2f, 0.2f, 0.2f, 0.2f };
+    GLfloat material_diffuse  [ ] = { 0.2f, 0.8f, 0.4f, 0.8f };
+    GLfloat material_specular [ ] = { 0.2f, 0.8f, 0.4f, 0.8f };
+    GLfloat material_emission [ ] = { 0.2f, 0.2f, 0.2f, 1.0f };
+    GLfloat material_shininess[ ] = { 20.0f };
+    glMaterialfv(GL_FRONT, GL_AMBIENT,  material_ambient);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE,  material_diffuse);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, material_specular);
+    glMaterialfv(GL_FRONT, GL_EMISSION, material_emission);
+    glMaterialfv(GL_FRONT, GL_SHININESS,material_shininess);
+		
+    GLfloat light_position [ ] = { 1.0f, 1.0f, 1.0f, 0.0f };
+    GLfloat light_ambient  [ ] = { 0.2f, 0.2f, 0.2f, 0.2f };
+    GLfloat light_diffuse  [ ] = { 0.5f, 0.5f, 0.5f, 0.2f };
+    GLfloat light_specular [ ] = { 0.5f, 0.5f, 0.5f, 0.2f };
+    glLightfv(GL_LIGHT0, GL_POSITION,  light_position);
+    glLightfv(GL_LIGHT0, GL_AMBIENT,   light_ambient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE,   light_diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR,  light_specular);
+
+    glEnable (GL_COLOR_MATERIAL);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_AUTO_NORMAL);
+    glEnable (GL_NORMALIZE);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc (GL_LESS);
+    // Setting lights and materials ends
+    // ****************************************************
+
+}
+void drawSphere()
+{
+
+	initLights();
+
+    glLoadIdentity();
+    CP_Sphere a;
+    glTranslated(-5.0, 0.0, 0.0);
+    glColor3f(1.0, 0.0, 0.0); // 红色
+    a.mf_drawSolid(false);
+    glTranslated(5.0, 0.0, 0.0);
+    a.mf_drawSolid(true);
+    glTranslated(5.0, 0.0, 0.0);
+    glColor3f(0.0, 0.0, 1.0); // 蓝色
+    a.mf_drawWireframe( );
+}
+void manualDrawBezier()
+{
+	if(isReady)
+	{
+		glColor3f(1.0, 0.0, 0.0);
+		//bazier
+		glBegin(GL_LINE_STRIP);
+		double t = 0;
+		for (unsigned int i = 0; i < besierSegment; i++)
+		{
+			t += 1.0/besierSegment;
+			//CP_Vector2D p = getBezierPoint(ctrlPoints, t, ctrlPoints.size()-1, ctrlPoints.size()-1 );
+			CP_Vector2D p = getBezierPointNotRecurrent(ctrlPoints, t);	
+			//CString msg;
+			//msg.Format(L"x=%f,y=%f", p.m_x, p.m_y);
+			//MessageBox(_T(" " + msg));
+			glVertex2d(p.m_x, p.m_y);
+		}
+		glEnd();
+		glFlush();
+	}
+	//else //control points also show
+	{
+		glBegin(GL_LINE_STRIP);
+		glColor3f(0.0, 0.0, 1.0);
+		for (unsigned int i = 0; i < ctrlPoints.size(); i++)
+		{	
+			glVertex2d(ctrlPoints[i].m_x, ctrlPoints[i].m_y);
+		}
+		glEnd();
+		glFlush();
+
+	}
 }
 
 void COpenGLDemoView::OnDraw(CDC* pDC)
@@ -169,10 +385,13 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
     
 	glClearColor(1,1,1,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	glLoadIdentity();
-	drawBizerSample();
-	
+	glPushMatrix();
+	//drawBizerSample();
+	drawBezierSurfaceDemo();
+	//drawSphere();
+	glPopMatrix();
+
+
 	SwapBuffers(pDC->m_hDC);
 	wglMakeCurrent(NULL, NULL);
 
@@ -208,14 +427,20 @@ void COpenGLDemoView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 
 void COpenGLDemoView::OnRButtonUp(UINT nflags, CPoint point)
 {
-	isReady = true;
-	CRect rect;
-	GetClientRect(&rect);
-	int x = point.x;
-	int y = rect.Height() - point.y;
 
-	CP_Vector2D p = CP_Vector2D(x, y);
-	ctrlPoints.push_back(p);
+	if (enableMaxCtrlPoint && ctrlPoints.size() > MAXCTRPOINT){
+		MessageBox(L"递归算法比较垃圾，控制点多了，难得等哦……就不再加了哈");
+	}else
+	{
+		CRect rect;
+		GetClientRect(&rect);
+		int x = point.x;
+		int y = rect.Height() - point.y;
+
+		CP_Vector2D p = CP_Vector2D(x, y);
+		ctrlPoints.push_back(p);
+	}
+	isReady = true;
 	Invalidate(TRUE);
 	CView::OnRButtonUp(nflags, point);
 }
@@ -300,6 +525,7 @@ int COpenGLDemoView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// that this function returns
 	m_hRC = wglCreateContext(dc.m_hDC);
 
+	//MessageBox(L"鼠标左键选择控制点位置\r\n右键生成画bezier曲线\r\n双击左键清空控制点");
 	return 0;
 }
 
@@ -325,25 +551,19 @@ void COpenGLDemoView::OnSize(UINT nType, int cx, int cy)
 	CView::OnSize(nType, cx, cy);
 	CClientDC dc(this);
 	wglMakeCurrent(dc.m_hDC, m_hRC);
-	/*
-	glViewport(0, 0, (GLsizei)cx, (GLsizei)cy);
+
+	glViewport(0, 0, (GLsizei) cx, (GLsizei) cy);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	double n = 100;
-	//gluOrtho2D(-cx/n, cx/n, -cy/n, cy/n);
-	gluOrtho2D(0, cx, 0, cy);
-	//glOrtho(-cx/n, cx/n, -cy/n, cy/n, -d, d);
-	glMatrixMode(GL_MODELVIEW);
-	
-	//glViewport(0, 0, (GLsizei)cx, (GLsizei)cy);
-	*/
-	
-	glViewport(0, 0, (GLsizei)cx, (GLsizei)cy);
+	if (cx <= cy)
+		  glOrtho(-4.0, 4.0, -4.0*(GLfloat)cy/(GLfloat)cx,
+				  4.0*(GLfloat)cy/(GLfloat)cx, -4.0, 4.0);
+	else
+		  glOrtho(-4.0*(GLfloat)cx/(GLfloat)cy,
+			      4.0*(GLfloat)cx/(GLfloat)cy, -4.0, 4.0, -4.0, 4.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluOrtho2D(0.0, (GLdouble)cx, 0.0, (GLdouble)cy);
 	
-
 	wglMakeCurrent(NULL, NULL);
 
 }
@@ -376,25 +596,28 @@ void COpenGLDemoView::OnMouseMove(UINT nFlags, CPoint point)
 void COpenGLDemoView::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	
-	if (ctrlPoints.size() >= 10){
+	if (enableMaxCtrlPoint && ctrlPoints.size() >= MAXCTRPOINT){
 		MessageBox(L"递归算法比较垃圾，控制点多了，难得等哦……就不再加了哈");
-		return ;
+		isReady = true;
+	}else
+	{
+		CRect rect;
+		GetClientRect(&rect);
+		int x = point.x;
+		int y = rect.Height() - point.y;
+
+		CP_Vector2D p = CP_Vector2D(x, y);
+		ctrlPoints.push_back(p);
+		isReady = false;
 	}
-
-	CRect rect;
-	GetClientRect(&rect);
-	int x = point.x;
-	int y = rect.Height() - point.y;
-
-	CP_Vector2D p = CP_Vector2D(x, y);
-	ctrlPoints.push_back(p);
 	Invalidate(TRUE);
-	isReady = false;
-	
 	CView::OnLButtonUp(nFlags, point);
 }
 
 void COpenGLDemoView::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
-	
+	MessageBox(L"清空控制点，重画");
+	ctrlPoints.clear();
+	isReady = false;
+	Invalidate(FALSE);
 }
