@@ -201,38 +201,13 @@ void drawBezierSurfaceDemo()
 	controlPoints[3].push_back(CP_Vector3D(-0.5, 1.5, -2.0));
 	controlPoints[3].push_back(CP_Vector3D(0.5, 1.5, 0.0));
 	controlPoints[3].push_back(CP_Vector3D(1.5, 1.5, -1.0));
-	
-	/*
-	CP_Vector3D ctrlpoints[4][4] = 
-	{
-	   {  CP_Vector3D(-1.5, -1.5, 4.0),
-	      CP_Vector3D(-0.5, -1.5, 2.0),
-	      CP_Vector3D(0.5, -1.5, -1.0),
-	      CP_Vector3D(1.5, -1.5, 2.0)
-	   },
-	   { CP_Vector3D(-1.5, -0.5, 1.0),
-	     CP_Vector3D(-0.5, -0.5, 3.0),
-	     CP_Vector3D(0.5, -0.5,  0.0),
-		 CP_Vector3D(1.5, -0.5, -1.0)
-	   },
-	   { CP_Vector3D(-1.5, 0.5, 4.0),
-	     CP_Vector3D(-0.5, 0.5, 0.0),
-	     CP_Vector3D(0.5, 0.5, 3.0),
-		 CP_Vector3D(1.5, 0.5, 4.0)
-	   },
-	   { CP_Vector3D(-1.5, 1.5, -2.0),
-	     CP_Vector3D(-0.5, 1.5, -2.0),
-	     CP_Vector3D(0.5, 1.5, 0.0),
-		 CP_Vector3D(1.5, 1.5, -1.0)
-	   }
-	};
-	*/
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);     // 设置深度方程
 	glLoadIdentity();
 	glRotated(65,1,1,1);
 	glColor3d(1.0, 0, 0);
-	//把控制定点画出来
+	//把控制定点画出
 	unsigned int i=0, j=0;
 	for(i=0;i<4;i++) {      // 绘制水平线
 		glBegin(GL_LINE_STRIP);
@@ -249,21 +224,13 @@ void drawBezierSurfaceDemo()
 	}
 	
 	double t = 0;
-/*	
-	vector<CP_Vector3D> last,temp;
-	temp.push_back(controlPoints[0][3]);
-	temp.push_back(controlPoints[1][3]);
-	temp.push_back(controlPoints[2][3]);
-	temp.push_back(controlPoints[3][3]);
-	for(unsigned int v = 0; v < besierSegment; v++)
-	{
-		t = v / besierSegment;
-		CP_Vector3D p = getBezierPointNotRecurrent(temp ,t);
-		last.push_back(p);
-	}
-*/
-	besierSegment = 200;
-	for (unsigned int u = 0; u < besierSegment; u++)
+
+	glColor3d(0.5, 0.3, 0.1);
+	besierSegment = 30;
+	const int uNum = 30, vNum = 30;
+	CP_Vector3D bezierPoints [uNum][vNum];
+
+	for (unsigned int u = 0; u < uNum; u++)
 	{
 		t = u * 1.0 / besierSegment;
 		vector<CP_Vector3D> newControl;
@@ -271,20 +238,49 @@ void drawBezierSurfaceDemo()
 		{
 			CP_Vector3D p = getBezierPointNotRecurrent(controlPoints[k], t);
 			newControl.push_back(p);
-			//glVertex2d(p.m_x / 10, p.m_y / 10);
 		}
 		
 		glBegin(GL_LINE_STRIP);
-		for (unsigned int v = 0; v < besierSegment; v++)
+		for (unsigned int v = 0; v < vNum; v++)
 		{
 			t = v * 1.0 / besierSegment;
-//			glVertex3d(last[v].m_x, last[v].m_y, last[v].m_z);
 			CP_Vector3D p = getBezierPointNotRecurrent(newControl, t);
 			glVertex3d(p.m_x / 1.0, p.m_y / 1.0, p.m_z / 1.0);
+			bezierPoints[u][v] = p;
 		}
+		glEnd();
 	}
 	
-	glEnd();
+	glColor3d(0.5, 0.2, 0.6);
+	glLoadIdentity();
+	glTranslated(-5.5, 0, 0);
+	glRotated(65,1,1,1);
+	
+	for (unsigned u = 0; u < uNum -1; u++)
+	{
+		for(unsigned v = 0; v < vNum - 1; v++ )
+		{  
+			//随机产生颜色
+			srand(u);
+			double c = rand() % 100 /100.0;
+			srand(u+c);
+			double cc = rand() % 100 /100.0;
+			srand(cc-u);
+			double ccc = rand() % 100 /100.0;
+			glColor3d(ccc, 1-c, cc);
+			
+			glBegin(GL_QUADS);
+			CP_Vector3D p = bezierPoints[u][v];
+			glVertex3d(p.m_x / 1.0, p.m_y / 1.0, p.m_z / 1.0);
+			p = bezierPoints[u+1][v];
+			glVertex3d(p.m_x / 1.0, p.m_y / 1.0, p.m_z / 1.0);
+			p = bezierPoints[u+1][v+1];
+			glVertex3d(p.m_x / 1.0, p.m_y / 1.0, p.m_z / 1.0);
+			p = bezierPoints[u][v+1];
+			glVertex3d(p.m_x / 1.0, p.m_y / 1.0, p.m_z / 1.0);
+			glEnd();
+		}
+	}
 	glFlush();
 
 }
@@ -616,8 +612,10 @@ void COpenGLDemoView::OnLButtonUp(UINT nFlags, CPoint point)
 
 void COpenGLDemoView::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
+	/*
 	MessageBox(L"清空控制点，重画");
 	ctrlPoints.clear();
 	isReady = false;
 	Invalidate(FALSE);
+	*/
 }
