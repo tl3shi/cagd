@@ -226,8 +226,10 @@ void drawBezierSurfaceDemo()
 	double t = 0;
 
 	glColor3d(0.5, 0.3, 0.1);
-	besierSegment = 30;
-	const int uNum = 30, vNum = 30;
+	//besierSegment = 30;
+	//const int uNum = 30, vNum = 30;
+	besierSegment = 50;
+	const int uNum = 50, vNum = 50;
 	CP_Vector3D bezierPoints [uNum][vNum];
 
 	for (unsigned int u = 0; u < uNum; u++)
@@ -268,17 +270,49 @@ void drawBezierSurfaceDemo()
 			srand(cc-u);
 			double ccc = rand() % 100 /100.0;
 			glColor3d(ccc, 1-c, cc);
-			
-			glBegin(GL_QUADS);
-			CP_Vector3D p = bezierPoints[u][v];
-			glVertex3d(p.m_x / 1.0, p.m_y / 1.0, p.m_z / 1.0);
-			p = bezierPoints[u+1][v];
-			glVertex3d(p.m_x / 1.0, p.m_y / 1.0, p.m_z / 1.0);
-			p = bezierPoints[u+1][v+1];
-			glVertex3d(p.m_x / 1.0, p.m_y / 1.0, p.m_z / 1.0);
-			p = bezierPoints[u][v+1];
-			glVertex3d(p.m_x / 1.0, p.m_y / 1.0, p.m_z / 1.0);
-			glEnd();
+			bool quads = true; 
+			if(quads){
+				glBegin(GL_QUADS);
+				CP_Vector3D p = bezierPoints[u][v];
+				glVertex3d(p.m_x / 1.0, p.m_y / 1.0, p.m_z / 1.0);
+				p = bezierPoints[u+1][v];
+				glVertex3d(p.m_x / 1.0, p.m_y / 1.0, p.m_z / 1.0);
+				p = bezierPoints[u+1][v+1];
+				glVertex3d(p.m_x / 1.0, p.m_y / 1.0, p.m_z / 1.0);
+				p = bezierPoints[u][v+1];
+				glVertex3d(p.m_x / 1.0, p.m_y / 1.0, p.m_z / 1.0);
+				glEnd();
+			}else{
+				//Èý½ÇÐÎ
+				CP_Vector3D p0 = bezierPoints[u][v];
+				CP_Vector3D p1 = bezierPoints[u+1][v];
+				CP_Vector3D p2 = bezierPoints[u+1][v+1];
+				CP_Vector3D p3 = bezierPoints[u][v+1];
+				
+				CP_Vector3D t_p = (p1 - p0) ^ (p2 - p0);
+				t_p.mf_normalize();
+
+				glBegin(GL_TRIANGLES);
+				glNormal3d(t_p.m_x, t_p.m_y, t_p.m_z);
+				glVertex3d(p0.m_x, p0.m_y, p0.m_z);
+				glNormal3d(t_p.m_x, t_p.m_y, t_p.m_z);
+				glVertex3d(p1.m_x, p1.m_y, p1.m_z);
+				glNormal3d(t_p.m_x, t_p.m_y, t_p.m_z);
+				glVertex3d(p2.m_x, p2.m_y, p2.m_z);
+				glEnd();
+				
+
+				t_p = (p3 - p2) ^ (p0 - p2);
+				t_p.mf_normalize();
+				glBegin(GL_TRIANGLES);
+				glNormal3d(t_p.m_x, t_p.m_y, t_p.m_z);
+				glVertex3d(p2.m_x, p2.m_y, p2.m_z);
+				glNormal3d(t_p.m_x, t_p.m_y, t_p.m_z);
+				glVertex3d(p3.m_x, p3.m_y, p3.m_z);
+				glNormal3d(t_p.m_x, t_p.m_y, t_p.m_z);
+				glVertex3d(p0.m_x, p0.m_y, p0.m_z);
+				glEnd();
+			}
 		}
 	}
 	glFlush();
@@ -379,7 +413,7 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
 		return;
     wglMakeCurrent(pDC->m_hDC, m_hRC);
     
-	glClearColor(1,1,1,1);
+	glClearColor(0,0,0,0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPushMatrix();
 	//drawBizerSample();
