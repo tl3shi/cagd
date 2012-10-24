@@ -255,22 +255,22 @@ void drawBezierSurfaceDemo()
 	
 	glColor3d(0.5, 0.2, 0.6);
 	glLoadIdentity();
-	glTranslated(-5.5, 0, 0);
+	glTranslated(-3.5, 0, 0);
 	glRotated(65,1,1,1);
 	
+	//随机产生颜色
+	srand(time(NULL));
 	for (unsigned u = 0; u < uNum -1; u++)
 	{
 		for(unsigned v = 0; v < vNum - 1; v++ )
 		{  
-			//随机产生颜色
-			srand(u);
 			double c = rand() % 100 /100.0;
-			srand(u+c);
+			//srand(u+c);
 			double cc = rand() % 100 /100.0;
-			srand(cc-u);
+			//srand(cc-u);
 			double ccc = rand() % 100 /100.0;
 			glColor3d(ccc, 1-c, cc);
-			bool quads = true; 
+			bool quads = false; 
 			if(quads){
 				glBegin(GL_QUADS);
 				CP_Vector3D p = bezierPoints[u][v];
@@ -301,6 +301,7 @@ void drawBezierSurfaceDemo()
 				glVertex3d(p2.m_x, p2.m_y, p2.m_z);
 				glEnd();
 				
+				glColor3d(1-ccc, c, 1-cc);
 
 				t_p = (p3 - p2) ^ (p0 - p2);
 				t_p.mf_normalize();
