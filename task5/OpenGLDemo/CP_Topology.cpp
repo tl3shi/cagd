@@ -22,11 +22,11 @@ CP_Body::~CP_Body( )
     m_edgeArray.RemoveAll( );
 
     n = m_vertexArray.GetSize( );
-	/*
+	
     for (i = 0; i < n; i++)
         delete m_vertexArray[i];
-    m_vertexArray.RemoveAll( );
-	*/
+    
+	m_vertexArray.RemoveAll( );
 } // 类CP_Body的析构函数结束
 
 CP_Face* CP_Body::mf_getFace(int index) const

@@ -122,7 +122,7 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glLoadIdentity();
-    glRotated(30, 0.5, 0.5, 0.5); 
+    glRotated(30, -1.0, 0.5, 0.0); 
 /*
 	CP_Body b;
     glTranslated(-5.0, 0.0, 0.0);
@@ -136,7 +136,7 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
 	CP_Body b;
 	
 	glTranslated(-5.0, 0.0, 0.0);
-	cf_bodyCylinderCreate(b, 0.0, 0.0, 0.0, 3.0, 1.0);
+	cf_bodyCylinderCreate(b, 0.0, 0.0, 0.0, 3.0, 1.3);
 	cf_bodyCylinderDrawSolid(b);
 	glTranslated(5.0, 0.0, 0.0);
 	cf_bodyCylinderDrawWireframe(b);

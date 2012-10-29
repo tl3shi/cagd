@@ -215,54 +215,25 @@ void cf_bodyCubeDrawEdge(const CP_Body& b)
 } // 函数cf_bodyCubeDrawEdge结束
 
 
-void cf_bodycylinderCreate_loop(CP_Body& b, CP_Loop& loop)
-{
-	CP_Coedge* coedge;
-	CP_Edge*   edge;
-	CP_Circle2D* circle2D;
-	CP_LineSegment2D* lineSegment2D;
-
-	lineSegment2D = new CP_LineSegment2D(0.0, 0.0, 0.0, 1.0);
-	edge=b.mf_getEdge(2);
-	coedge = new CP_Coedge(lineSegment2D, &loop, edge, true);
-	loop.mf_addCoedge(coedge);
-	edge->mf_addCoedge(coedge);
-
-	circle2D = new CP_Circle2D();
-	edge = b.mf_getEdge(0);
-	coedge = new CP_Coedge(circle2D, &loop, edge, true);
-	loop.mf_addCoedge(coedge);
-	edge->mf_addCoedge(coedge);
-
-	lineSegment2D = new CP_LineSegment2D(0.0, 1.0, 0.0, 0.0);
-	edge=b.mf_getEdge(2);
-	coedge = new CP_Coedge(lineSegment2D, &loop, edge, false);
-	loop.mf_addCoedge(coedge);
-	edge->mf_addCoedge(coedge);
-
-	circle2D = new CP_Circle2D();
-	edge = b.mf_getEdge(1);
-	coedge = new CP_Coedge(circle2D, &loop, edge, false);
-	loop.mf_addCoedge(coedge);
-	edge->mf_addCoedge(coedge);
-}
-
 void cf_bodyCylinderCreate(CP_Body& b, double cx, double cy, double cz, double h, double r)
 {
     CP_Face* tf;
     CP_Edge* te;
     CP_Vertex* tv1, *tv0;
-    CP_Plane* plane;
     CP_LineSegment3D* lineSegment;
-    CP_Point3D cp1, cp0, origin, cp00;
-    CP_Vector3D vx, vy;
+    CP_Point3D *cp1, *cp0;
+	CP_Point3D origin, cp00;
+    CP_Vector3D vx3d, vy3d;
+    CP_Vector2D vx2d, vy2d;
 	CP_Circle * circle;
+
+
 	//两个顶点
-	cp0 =  CP_Point3D(cx + r, cy, cz);
-	cp1 =  CP_Point3D(cx + r, cy, cz + h);
-	tv0 = new CP_Vertex(&cp0);
+	cp0 =  new CP_Point3D(cx + r, cy, cz);
+	cp1 =  new CP_Point3D(cx + r, cy, cz + h);
+	tv0 = new CP_Vertex(cp0);
 	b.mf_addVertex(tv0);
-	tv1 = new CP_Vertex(&cp1);
+	tv1 = new CP_Vertex(cp1);
 	b.mf_addVertex(tv1);
 	
 	//下底圆心
@@ -271,69 +242,69 @@ void cf_bodyCylinderCreate(CP_Body& b, double cx, double cy, double cz, double h
 	cp00 =  CP_Point3D(cx, cy, cz+h);
 
 	//3条边
-	vx = cp0 - origin;
-	vy = CP_Point3D(cx, cy+r, cz) - origin;
-
-	CP_Circle3D * circle0 = new CP_Circle3D(origin, vx, vy, r);
+	vx3d = CP_Vector3D(1,0,0);
+	vy3d = CP_Vector3D(0,1,0);
+	
+	vx2d = CP_Vector2D(1,0);
+	vy2d = CP_Vector2D(0,1);
+	//下底边
+	CP_Circle3D * circle0 = new CP_Circle3D(origin, vx3d, vy3d, r);
 	tv0 = (CP_Vertex *)b.mf_getVertex(0);
-	tv1= (CP_Vertex *)b.mf_getVertex(0);
-	te = new CP_Edge(circle0, tv0, tv1);
+	te = new CP_Edge(circle0, tv0, tv0);
 	b.mf_addEdge(te);
 	tv0->mf_addAdjacentEdge(te);
-	tv1->mf_addAdjacentEdge(te);
-	
-	
-	CP_Circle3D * circle1 = new  CP_Circle3D(cp00, vx, vy, r);
+	//上底边
+	CP_Circle3D * circle1 = new  CP_Circle3D(cp00, vx3d, vy3d, r);
 	tv0 = (CP_Vertex *)b.mf_getVertex(1);
-	tv1 = (CP_Vertex *)b.mf_getVertex(1);
-	te = new CP_Edge(circle1, tv0, tv1);
+	te = new CP_Edge(circle1, tv0, tv0);
 	b.mf_addEdge(te);
 	tv0->mf_addAdjacentEdge(te);
-	tv1->mf_addAdjacentEdge(te);
-
-    lineSegment=new CP_LineSegment3D(cp0, cp1);
+	//棱
 	tv0 = (CP_Vertex *)b.mf_getVertex(0);
 	tv1 = (CP_Vertex *)b.mf_getVertex(1);
+    lineSegment=new CP_LineSegment3D(*(tv0->m_point), *(tv1->m_point));
     te=new CP_Edge(lineSegment, tv0, tv1);
     b.mf_addEdge(te);
     tv0->mf_addAdjacentEdge(te);
     tv1->mf_addAdjacentEdge(te);
 	
+	
+	CP_Point2D origin2 = CP_Point2D(cx, cy);
 	//3个面
 	//下底面
     //CP_Circle3D(const CP_Point3D& c, const CP_Vector3D& vx, const CP_Vector3D& vy, double r);
-	CP_Circle3D lowCircle = CP_Circle3D(origin, vx, vy, r);
-	circle  = new CP_Circle(origin, vx, vy, r);
+	circle  = new CP_Circle(origin, vx3d, vy3d, r);
 	tf = new CP_Face(&b, circle, true);
 	b.mf_addFace(tf);
-
 	CP_Loop * loop = new CP_Loop(tf);
 	tf->mf_addLoop(loop);
-	CP_Circle2D* circle2D = new CP_Circle2D();
+	CP_Circle2D* circle2D = new CP_Circle2D(origin2, vx2d, vy2d, r);
 	CP_Edge* edge = b.mf_getEdge(0);
 	CP_Coedge* coedge = new CP_Coedge(circle2D, loop, edge, false);
 	loop->mf_addCoedge(coedge);
 	edge->mf_addCoedge(coedge);
 
 	//上底面
-	CP_Circle3D upCircle = CP_Circle3D(cp00, vx, vy, r);
-	circle = new CP_Circle(cp00, vx, vy, r);
+	circle = new CP_Circle(cp00, vx3d, vy3d, r);
 	tf = new CP_Face(&b, circle, true);
 	b.mf_addFace(tf);
-	
 	loop = new CP_Loop(tf);
 	tf->mf_addLoop(loop);
-	circle2D = new CP_Circle2D();
+	circle2D = new CP_Circle2D(origin2, vx2d, vy2d, r);
 	edge = b.mf_getEdge(1);
 	coedge = new CP_Coedge(circle2D, loop, edge, true);
 	loop->mf_addCoedge(coedge);
 	edge->mf_addCoedge(coedge);
 	
 	//圆柱面
-	CP_Cylinder* cylinder = new CP_Cylinder(origin, vx, vy, r, h);
+	CP_Cylinder* cylinder = new CP_Cylinder(origin, vx3d, vy3d, r, h);
 	tf = new CP_Face(&b, cylinder, true);
 	b.mf_addFace(tf);
-	cf_bodycylinderCreate_loop(b, *loop);
+	loop = new CP_Loop(tf);
+	tf->mf_addLoop(loop);
+	//展开是长方形 由上下底边0，1 和侧边2
+	cf_bodyCubeCreate_loop(b, *loop, 0, true, 2, true, 1, false, 2, false);
+
 } // 函数cf_bodyCylinderCreate结束
 
 void cf_bodyCylinderDrawSolid(const CP_Body& b)
@@ -344,7 +315,7 @@ void cf_bodyCylinderDrawSolid(const CP_Body& b)
 
 void cf_bodyCylinderDrawWireframe(const CP_Body& b)
 {
-	glColor3f(0.0, 0.0, 1.0);
+	glColor3f(0.0, 1.0, 0.0);
     glLineWidth(1.2f);
     cf_bodyDrawSurface(b, false);
 } // 函数cf_bodyCylinderDrawWireframe结束
