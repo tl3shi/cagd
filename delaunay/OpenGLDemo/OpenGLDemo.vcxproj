@@ -124,11 +124,11 @@
     <None Include="UserImages.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\CP_PointVector.h" />
     <ClInclude Include="ChildFrm.h" />
     <ClInclude Include="ClassView.h" />
     <ClInclude Include="CP_Curve2D.h" />
     <ClInclude Include="CP_Curve3D.h" />
+    <ClInclude Include="CP_PointVector.h" />
     <ClInclude Include="DelaunayTriangle.h" />
     <ClInclude Include="FileView.h" />
     <ClInclude Include="MainFrm.h" />

@@ -195,6 +195,14 @@ CP_Point2D operator - (const CP_Point2D& pt, const CP_Vector2D& v)
     return CP_Point2D (pt.m_x - v.m_x, pt.m_y - v.m_y); 
 } //函数operator -结束
 
+//重写两个点相等，坐标相等即相等
+bool operator == (const CP_Point2D& u, const CP_Point2D& v)
+{
+	if (u.m_x == v.m_x && u.m_y == v.m_y) 
+		return true;
+	return false;
+}
+
 CP_Vector2D operator - (const CP_Point2D& p, const CP_Point2D& q)
 {
     return CP_Vector2D (p.m_x - q.m_x, p.m_y - q.m_y); 

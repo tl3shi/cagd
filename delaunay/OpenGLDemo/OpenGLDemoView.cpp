@@ -18,7 +18,7 @@
 
 #include <algorithm>
 #include <vector>
-#include <math.h>
+#include <ctime>
 
 #include "GL/GLU.H" // 已经包含GL/GL.h
 #include "CP_Curve2D.h"
@@ -51,6 +51,7 @@ BEGIN_MESSAGE_MAP(COpenGLDemoView, CView)
 END_MESSAGE_MAP()
 
 void initLights();
+bool isReady  = true;
 
 // COpenGLDemoView 构造/析构
 
@@ -107,6 +108,20 @@ void initLights()
     // Setting lights and materials ends
     // ****************************************************
 }
+void drawPoints(vector<CP_Point2D> points)
+{
+	glColor3d(0.0,0.0,1.0);
+	//glBegin(GL_LINE_LOOP);
+	glPointSize(5.0);
+	glBegin(GL_POINTS);
+	for (int i = 0; i < points.size(); i++)
+	{
+		CP_Point2D p = points[i];
+		glVertex2d(p.m_x, p.m_y);
+	}
+	glEnd();
+}
+vector<CP_Point2D> points;
 
 void COpenGLDemoView::OnDraw(CDC* pDC)
 {
@@ -121,19 +136,53 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
 
 	glLoadIdentity();
 	glColor3d(1.0, 0.0, 0.0);
-	CP_Point2D p0(0.0,0.0);
-	CP_Point2D p2(1.0,1.5);
-	CP_Point2D p1(-0.5,0.5);
-	DelaunayTriangle* triange0 = new DelaunayTriangle(p0, p1, p2);
-	triange0->draw();
+	if (false)
+	{
+		
+		CP_Point2D p0(0.0,0.0);
+		CP_Point2D p2(3.0,0.0);
+		CP_Point2D p1(0.0,4.0);
+		//CP_Point2D p3(2.5, 5.0);
+		//CP_Point2D p4(-1.5, -2.0);
+		
+		//DelaunayTriangle* triange0 = new DelaunayTriangle(p0, p1, p2);
+		//triange0->draw();
 
-
-
-	glFlush();
+		vector<CP_Point2D> points;
+		points.push_back(p0);
+		points.push_back(p1);
+		points.push_back(p2);
+		//points.push_back(p3);
+		//points.push_back(p4);
+		
+		isReady = false;
+	}
+	drawPoints(points);
+	if(isReady)
+	{
+		vector<DelaunayTriangle> triangles;
+		triangles = doDelaunayTriangulate(points);
+		glColor3d(0.0, 0.0, 1.0);
+		srand(time(NULL));
+		for (int i = 0; i<triangles.size(); i++)
+		{
+			DelaunayTriangle t = triangles[i];
+		//	double a = rand()%100 / 100.0;
+		//	double b = rand()%100 / 100.0;
+		//	double c = rand()%100 / 100.0;
+		//	glColor3d(a, b, c);
+			t.draw();
+		}
+		/*
+		CString msg;
+		msg.Format(L"%d",triangles.size());
+		MessageBox(L"size="+msg);
+		*/
+	}
+		glFlush();
 
 	SwapBuffers(pDC->m_hDC);
 	wglMakeCurrent(NULL, NULL);
-	delete triange0;
 }
 
 
@@ -166,6 +215,8 @@ void COpenGLDemoView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 
 void COpenGLDemoView::OnRButtonUp(UINT nflags, CPoint point)
 {
+	//isReady = true;
+	//Invalidate();
 	CView::OnRButtonUp(nflags, point);
 }
 /*
@@ -249,7 +300,7 @@ int COpenGLDemoView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// that this function returns
 	m_hRC = wglCreateContext(dc.m_hDC);
 
-	//MessageBox(L"鼠标左键选择控制点位置\r\n右键生成画bezier曲线\r\n双击左键清空控制点");
+	//MessageBox(L"鼠标左键画多边形,\r\n双击左键清空点，重画");
 	return 0;
 }
 
@@ -276,12 +327,13 @@ void COpenGLDemoView::OnSize(UINT nType, int cx, int cy)
 	wglMakeCurrent(dc.m_hDC, m_hRC);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-
+	/*
 	double d=10;
 	double n=100;
 
 	glOrtho(-cx/n, cx/n, -cy/n, cy/n, -d, d);
-
+	*/
+	gluOrtho2D(0.0, (GLdouble)cx, 0.0, (GLdouble)cy);
 	glMatrixMode(GL_MODELVIEW);
 	glViewport(0, 0, cx, cy);
 	wglMakeCurrent(NULL, NULL);
@@ -312,29 +364,30 @@ void COpenGLDemoView::OnMouseMove(UINT nFlags, CPoint point)
 	CView::OnMouseMove(nFlags, point);
 }
 
+
 void COpenGLDemoView::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	/*	
+		
 	{
 		CRect rect;
 		GetClientRect(&rect);
 		int x = point.x;
 		int y = rect.Height() - point.y;
 
-		CP_Vector2D p = CP_Vector2D(x, y);
+		CP_Point2D p = CP_Point2D(x, y);
+		points.push_back(p);
+		
 	}
 	Invalidate(TRUE);
-	*/
 	CView::OnLButtonUp(nFlags, point);
 }
 
 void COpenGLDemoView::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
-	/*
+	
 	MessageBox(L"清空控制点，重画");
-	ctrlPoints.clear();
-	isReady = false;
+	points.clear();
 	Invalidate(FALSE);
-	*/
+	
 	CView::OnLButtonDblClk(nFlags,point);
 }
