@@ -26,8 +26,8 @@ DelaunayTriangle::DelaunayTriangle(CP_Point2D &p0, CP_Point2D &p1, CP_Point2D &p
 void DelaunayTriangle::draw()
 {
 	
-	//glBegin(GL_TRIANGLES);
-	glBegin(GL_LINE_LOOP);
+	glBegin(GL_TRIANGLES);
+	//glBegin(GL_LINE_LOOP);
 	glVertex2d(this->p0.m_x, this->p0.m_y);
 	glVertex2d(this->p1.m_x, this->p1.m_y);
 	glVertex2d(this->p2.m_x, this->p2.m_y);
@@ -57,7 +57,7 @@ void DelaunayTriangle::calRadius()
 	double d = (this->p2 - this->p0).m_y;
 	double e = a * (this->p0.m_x + this->p1.m_x) + b *(this->p0.m_y + this->p1.m_y);
 	double f = c * (this->p0.m_x + this->p2.m_x) + d *(this->p0.m_y + this->p2.m_y);
-	double g = 2.0 * (a * (this->p2.m_y - this->p1.m_y) - b * (this->p2.m_x + this->p1.m_x));
+	double g = 2.0 * (a * (this->p2.m_y - this->p1.m_y) - b * (this->p2.m_x - this->p1.m_x));
 	
 	double center_x, center_y;
 	double dx, dy;
@@ -70,8 +70,8 @@ void DelaunayTriangle::calRadius()
 		double min_x = min(min(this->p0.m_x,this->p1.m_x),this->p2.m_x);
 		double min_y = min(min(this->p0.m_y,this->p1.m_y),this->p2.m_y);
 		
-		center_x = (max_x - min_x) / 2.0;
-		center_y = (max_y - min_y) / 2.0;
+		center_x = (max_x + min_x) / 2.0;
+		center_y = (max_y + min_y) / 2.0;
 
 		dx = center_x - min_x;
 		dy = center_y - min_y;
@@ -120,7 +120,7 @@ vector<DelaunayEdge> removeDoubleEgdes(vector<DelaunayEdge> egdes)
 	return newEgdes;
 }
 
-bool DelaunayTriangle::includingPoint(CP_Point2D &p)
+bool DelaunayTriangle::includingPoint(CP_Point2D p)
 {
 	double dx = p.m_x - this->center.m_x;
 	double dy = p.m_y - this->center.m_y;
@@ -187,15 +187,9 @@ vector<DelaunayTriangle> doDelaunayTriangulate(vector<CP_Point2D> points)
 	vector<DelaunayTriangle> triangles;
 
 	DelaunayTriangle bigTriangle = createBigTriangle(points);
-	for (int i = 0; i<points.size(); i++)
-	{
-		if(! bigTriangle.includingPoint(points[i])){
-			exit(-1);
-		}
-	}
 
 	glColor3d(0.0,0.0,1.0);
-	bigTriangle.draw();
+	//bigTriangle.draw();
 	triangles.push_back(bigTriangle);
 
 	for (int i = 0; i < points.size(); i++)
@@ -227,6 +221,7 @@ vector<DelaunayTriangle> doDelaunayTriangulate(vector<CP_Point2D> points)
 	}
 	return result;
 	*/
+	
 	vector<DelaunayTriangle>::iterator it;
 	for (it = triangles.begin(); it != triangles.end();)
 	{
@@ -247,19 +242,19 @@ vector<DelaunayTriangle> doDelaunayTriangulate(vector<CP_Point2D> points)
 
 DelaunayTriangle createBigTriangle(vector<CP_Point2D> points)
 {
-	double max_x=0.0, max_y=0.0, min_x=0.0, min_y=0.0;
+	double max_x=1.0e-20, max_y=1.0e-20, min_x=10e10, min_y=10e10;
 	for(int i = 0; i < points.size(); i++)
 	{
 		CP_Point2D p = points[i];
-		max_x = p.m_x > max_x ? p.m_x : max_x;
-		max_y = p.m_y > max_y ? p.m_y : max_y;
-		min_x = p.m_x < min_x ? p.m_x : min_x;
-		min_y = p.m_y < min_y ? p.m_y : min_y;
+		max_x = max(p.m_x, max_x);//p.m_x > max_x ? p.m_x : max_x;
+		max_y = max(p.m_y, max_y);//p.m_y > max_y ? p.m_y : max_y;
+		min_x = min(p.m_x, min_x);//p.m_x < min_x ? p.m_x : min_x;
+		min_y = min(p.m_y, min_y); //p.m_y < min_y ? p.m_y : min_y;
 	}
 	//大点儿没事
 
-	double dx = (max_x - min_x);
-	double dy = (max_y - min_y);
+	double dx = (max_x - min_x) ;
+	double dy = (max_y - min_y) ;
 	//左下角
 	CP_Point2D p0 = CP_Point2D(min_x - dx, min_y - dy*3);
 	//上顶点

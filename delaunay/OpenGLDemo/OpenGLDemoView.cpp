@@ -139,23 +139,23 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
 	if (false)
 	{
 		
-		CP_Point2D p0(0.0,0.0);
-		CP_Point2D p2(3.0,0.0);
-		CP_Point2D p1(0.0,4.0);
-		//CP_Point2D p3(2.5, 5.0);
+		CP_Point2D p0(174.0,155.0);
+		CP_Point2D p1(165.0,221.0);
+		CP_Point2D p2(234.0,210.0);
+		CP_Point2D p3(234, 85.0);
 		//CP_Point2D p4(-1.5, -2.0);
 		
 		//DelaunayTriangle* triange0 = new DelaunayTriangle(p0, p1, p2);
 		//triange0->draw();
 
-		vector<CP_Point2D> points;
+		//vector<CP_Point2D> points;
 		points.push_back(p0);
 		points.push_back(p1);
 		points.push_back(p2);
-		//points.push_back(p3);
+		points.push_back(p3);
 		//points.push_back(p4);
 		
-		isReady = false;
+		isReady = true;
 	}
 	drawPoints(points);
 	if(isReady)
@@ -163,14 +163,14 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
 		vector<DelaunayTriangle> triangles;
 		triangles = doDelaunayTriangulate(points);
 		glColor3d(0.0, 0.0, 1.0);
-		srand(time(NULL));
+		srand((unsigned int)time(NULL));
 		for (int i = 0; i<triangles.size(); i++)
 		{
 			DelaunayTriangle t = triangles[i];
-		//	double a = rand()%100 / 100.0;
-		//	double b = rand()%100 / 100.0;
-		//	double c = rand()%100 / 100.0;
-		//	glColor3d(a, b, c);
+			double a = rand()%100 / 100.0;
+			double b = rand()%100 / 100.0;
+			double c = rand()%100 / 100.0;
+			glColor3d(a, b, c);
 			t.draw();
 		}
 		/*
