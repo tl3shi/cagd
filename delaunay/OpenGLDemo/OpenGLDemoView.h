@@ -53,6 +53,8 @@ public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
+	afx_msg void Onfilltriangle();
+	afx_msg void OnAddPoints();
 };
 
 #ifndef _DEBUG  // OpenGLDemoView.cpp 中的调试版本

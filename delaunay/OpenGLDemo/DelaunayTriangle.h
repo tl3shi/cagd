@@ -35,7 +35,7 @@ public:
 	
 	DelaunayTriangle();
 	DelaunayTriangle(CP_Point2D &p0, CP_Point2D &p1, CP_Point2D &p2);
-	void draw();
+	void draw(bool filled=false);
 	//某点是否在其外接圆内
 	bool includingPoint(CP_Point2D p);
 	

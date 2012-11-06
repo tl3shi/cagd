@@ -48,11 +48,13 @@ BEGIN_MESSAGE_MAP(COpenGLDemoView, CView)
 	ON_WM_MOUSEMOVE()
 	ON_WM_ERASEBKGND()
 	ON_WM_LBUTTONDBLCLK()
+	ON_COMMAND(ID_fillTriangle, &COpenGLDemoView::Onfilltriangle)
+	ON_COMMAND(ID_addPoints, &COpenGLDemoView::OnAddPoints)
 END_MESSAGE_MAP()
 
 void initLights();
 bool isReady  = true;
-
+bool filled = false;
 // COpenGLDemoView 构造/析构
 
 COpenGLDemoView::COpenGLDemoView()
@@ -171,7 +173,7 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
 			double b = rand()%100 / 100.0;
 			double c = rand()%100 / 100.0;
 			glColor3d(a, b, c);
-			t.draw();
+			t.draw(filled);
 		}
 		/*
 		CString msg;
@@ -390,4 +392,40 @@ void COpenGLDemoView::OnLButtonDblClk(UINT nFlags, CPoint point)
 	Invalidate(FALSE);
 	
 	CView::OnLButtonDblClk(nFlags,point);
+}
+
+void COpenGLDemoView::Onfilltriangle()
+{
+	//填充三角形
+	if (!filled)
+	{
+		filled = true;
+		CMenu menu;
+		menu.LoadMenu(IDR_OpenGLDemoTYPE);
+		CMenu * pmenu = menu.GetSubMenu(0);
+		pmenu->ModifyMenuW(ID_fillTriangle, MF_BYCOMMAND,ID_fillTriangle,L"测试");
+	}else
+	{
+		filled = false;
+	}
+	Invalidate();
+}
+
+
+void COpenGLDemoView::OnAddPoints()
+{
+	CRect rect;
+	GetClientRect(&rect);
+	int h = rect.Height();
+	int w = rect.Width();
+	int pointLength = 20;
+	for (int i = 0; i < pointLength; i++)
+	{	
+		int x = rand() % w;
+		int y = rand() % h;
+		CP_Point2D p = CP_Point2D(x, y);
+		points.push_back(p);
+	}
+	Invalidate();
+		
 }

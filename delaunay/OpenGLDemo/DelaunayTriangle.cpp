@@ -23,16 +23,19 @@ DelaunayTriangle::DelaunayTriangle(CP_Point2D &p0, CP_Point2D &p1, CP_Point2D &p
 	this->calRadius();
 }
 
-void DelaunayTriangle::draw()
+void DelaunayTriangle::draw(bool filled)
 {
 	
-	glBegin(GL_TRIANGLES);
-	//glBegin(GL_LINE_LOOP);
+	if (filled)
+		glBegin(GL_TRIANGLES);
+	else
+		glBegin(GL_LINE_LOOP);
 	glVertex2d(this->p0.m_x, this->p0.m_y);
 	glVertex2d(this->p1.m_x, this->p1.m_y);
 	glVertex2d(this->p2.m_x, this->p2.m_y);
 	glEnd();
 }
+
 /*
 Let the three given points be a, b, c. Use _0 and _1 to represent x and y coordinates. The coordinates of the center p=(p_0,p_1) of the circle determined by a, b, and c are:
 A = b_0 - a_0;
@@ -242,6 +245,7 @@ vector<DelaunayTriangle> doDelaunayTriangulate(vector<CP_Point2D> points)
 
 DelaunayTriangle createBigTriangle(vector<CP_Point2D> points)
 {
+	/*
 	double max_x=1.0e-20, max_y=1.0e-20, min_x=10e10, min_y=10e10;
 	for(int i = 0; i < points.size(); i++)
 	{
@@ -261,6 +265,14 @@ DelaunayTriangle createBigTriangle(vector<CP_Point2D> points)
 	CP_Point2D p1 = CP_Point2D(min_x - dx,max_y + dy);
 	//右顶点
 	CP_Point2D p2 = CP_Point2D(max_x + dx*3, max_y + dy);
+	*/
+	double WIDTH = 10e6;
+	//左下角
+	CP_Point2D p0 = CP_Point2D(-WIDTH,+WIDTH);
+	//上顶点
+	CP_Point2D p1 = CP_Point2D(0,WIDTH);
+	//右顶点
+	CP_Point2D p2 = CP_Point2D(+WIDTH,-WIDTH);
 
 	DelaunayTriangle triangle = DelaunayTriangle(p0, p1, p2);
 
