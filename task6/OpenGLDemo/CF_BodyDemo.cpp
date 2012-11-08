@@ -351,3 +351,33 @@ void cf_bodyCubeCreate_loop(CP_Body& b, CP_Loop& loop, int e1, bool samDir1, int
 } // 函数cf_bodyCubeCreate_loop结束
 
 
+void cf_bodyCylinderTrimmedCreate(CP_Body& b, double cx, double cy, double cz, double h, double r, double u1, double u2, double v1, double v2)
+{
+	//顶点
+	//根据PPT中猜测u3,u4的值
+	double u3 = 1 - u2; 
+	double u4 = 1 - u1;
+
+	//下顶点
+	CP_Point3D p0 = CP_Point3D(cx+r,cy,cz);
+	//上顶点
+	CP_Point3D p1 = CP_Point3D(cx+r,cy,cz+h);
+	
+	CP_Cylinder cylinder = new CP_Cylinder();
+	CP_Point3D p2 = CP_Cylinder::mf_getPoint(u1, v1);
+
+
+
+}
+void cf_bodyCylinderTrimmedDrawSolid(const CP_Body& b)
+{
+
+}
+void cf_bodyCylinderTrimmedDrawWireframe(const CP_Body& b)
+{
+
+}
+void cf_bodyCylinderTrimmedDrawEdge(const CP_Body& b)
+{
+
+}

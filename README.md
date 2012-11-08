@@ -23,3 +23,5 @@ Computer Aided Geometric Modeling
 * task5: 边界表示法(B-Rep),圆柱体
 
 * delaunay: 平面点集的delaunay剖分
+
+* task6: B-Rep,绘制裁剪圆柱体

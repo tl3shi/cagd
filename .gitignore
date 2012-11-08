@@ -7,6 +7,8 @@ Debug/*
 # Binary version of the current resource script file;used for quick loading.
 *.aps
 
+*.bak
+
 thumbs.db
 
 # Compiled Object files
