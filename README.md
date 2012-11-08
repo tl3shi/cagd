@@ -21,3 +21,5 @@ Computer Aided Geometric Modeling
 *  bezier suface: bezier 曲面 2
 
 * task5: 边界表示法(B-Rep),圆柱体
+
+* delaunay: 平面点集的delaunay剖分
