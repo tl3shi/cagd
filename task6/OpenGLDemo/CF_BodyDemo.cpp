@@ -353,31 +353,306 @@ void cf_bodyCubeCreate_loop(CP_Body& b, CP_Loop& loop, int e1, bool samDir1, int
 
 void cf_bodyCylinderTrimmedCreate(CP_Body& b, double cx, double cy, double cz, double h, double r, double u1, double u2, double v1, double v2)
 {
-	//顶点
+	
 	//根据PPT中猜测u3,u4的值
-	double u3 = 1 - u2; 
+	double u3 = 1 - u2 ; 
 	double u4 = 1 - u1;
+	
+	CP_Vertex * t_vetex, *tv0, *tv1;
+    CP_Face* tf;
+    CP_Edge* te;
+    CP_LineSegment3D* lineSegment;
+	CP_Circle * circle;
 
+	//下底面圆心
+	CP_Point3D originLow = CP_Point3D(cx, cy, cz);
+	//上底面圆心
+	CP_Point3D originUp = CP_Point3D(cx, cy, cz+h);
+
+	CP_Point2D origin2d= CP_Point2D(cx, cy);
+
+	//方向单位向量
+	CP_Vector3D vx3d = CP_Vector3D(1,0,0);
+	CP_Vector3D vy3d = CP_Vector3D(0,1,0);
+	
+	CP_Vector2D vx2d = CP_Vector2D(1,0);
+	CP_Vector2D vy2d = CP_Vector2D(0,1);
+
+#pragma region 填充顶点
 	//下顶点
 	CP_Point3D p0 = CP_Point3D(cx+r,cy,cz);
 	//上顶点
 	CP_Point3D p1 = CP_Point3D(cx+r,cy,cz+h);
 	
-	CP_Cylinder cylinder = new CP_Cylinder();
-	CP_Point3D p2 = CP_Cylinder::mf_getPoint(u1, v1);
+	CP_Cylinder t = CP_Cylinder(originLow, vx3d, vy3d, r, h);
+	
+	CP_Point3D p2 = t.mf_getPoint(u1, v1);
+	CP_Point3D p3 = t.mf_getPoint(u2, v1);
+	CP_Point3D p4 = t.mf_getPoint(u3, v1);
+	CP_Point3D p5 = t.mf_getPoint(u4, v1);
+	
+	CP_Point3D p6 = t.mf_getPoint(u1, v2);
+	CP_Point3D p7 = t.mf_getPoint(u2, v2);
+	CP_Point3D p8 = t.mf_getPoint(u3, v2);
+	CP_Point3D p9 = t.mf_getPoint(u4, v2);
+	
+	t_vetex = new CP_Vertex(&p0);
+	b.mf_addVertex(t_vetex);//v0
+	
+	t_vetex = new CP_Vertex(&p1);
+	b.mf_addVertex(t_vetex);//v1
+	
+	t_vetex = new CP_Vertex(&p2);
+	b.mf_addVertex(t_vetex);//v2
+	
+	t_vetex = new CP_Vertex(&p3);
+	b.mf_addVertex(t_vetex);//v3
+	
+	t_vetex = new CP_Vertex(&p4);
+	b.mf_addVertex(t_vetex);//v4
+	
+	t_vetex = new CP_Vertex(&p5);
+	b.mf_addVertex(t_vetex);//v5
+	
+	t_vetex = new CP_Vertex(&p6);
+	b.mf_addVertex(t_vetex);//v6
+	
+	t_vetex = new CP_Vertex(&p7);
+	b.mf_addVertex(t_vetex);//v7
+	
+	t_vetex = new CP_Vertex(&p8);
+	b.mf_addVertex(t_vetex);//v8
 
+	t_vetex = new CP_Vertex(&p9);
+	b.mf_addVertex(t_vetex);//v9
+#pragma endregion 顶点填充完毕
 
+#pragma  region 填充边
+	//下底边E0
+	CP_Circle3D * circle0 = new CP_Circle3D(originLow, vx3d, vy3d, r);
+	t_vetex = (CP_Vertex *)b.mf_getVertex(0);
+	te = new CP_Edge(circle0, t_vetex , t_vetex);
+	b.mf_addEdge(te);
+	t_vetex->mf_addAdjacentEdge(te);
+	//棱E1
+	tv0 = (CP_Vertex *)b.mf_getVertex(0);
+	tv1 = (CP_Vertex *)b.mf_getVertex(1);
+    lineSegment=new CP_LineSegment3D(*(tv0->m_point), *(tv1->m_point));
+    te=new CP_Edge(lineSegment, tv0, tv1);
+    b.mf_addEdge(te);
+    tv0->mf_addAdjacentEdge(te);
+    tv1->mf_addAdjacentEdge(te);
+	
+	//上底边E2
+	CP_Circle3D * circle1 = new  CP_Circle3D(originUp, vx3d, vy3d, r);
+	t_vetex = (CP_Vertex *)b.mf_getVertex(1);
+	te = new CP_Edge(circle1, t_vetex, t_vetex);
+	b.mf_addEdge(te);
+	t_vetex->mf_addAdjacentEdge(te);
+	
+	//E3 v2-v3连线
+	//double startAngle = u1 * PI2;
+	//double endAngle = u2 * PI2;
 
+	CP_Point3D originCentralBelow = CP_Point3D(cx, cy, cz+h*v1);
+	CP_Point3D originCentralUp = CP_Point3D(cx, cy, cz+h*v2);
+	//四个原弧线            E3    E5,	E11, E13
+	double startAngle[] = {u1*PI2, u3*PI2, u1*PI2, u3*PI2 };
+	double endAngle[] =   {u2*PI2, u4*PI2, u2*PI2, u4*PI2};
+	int vertexArcArr0[] =   {2,	4,		6,		8};
+	int vertexArcArr1[] =   {3,	5,		7,		9};
+	CP_Point3D t_origin[]	= {originCentralBelow, originCentralBelow, originCentralUp, originCentralUp};
+	//四个横直线段    E4,		E6,	E12,	E14
+	int vertexHor0[] = {3,	5,	7,	6};
+	int vertexHor1[] = {4,	2,	8,	9};
+	//四个竖直线段	E7,E8,E9,E10
+	int vertexVet0[] = {2,7,8,5};
+	int vertexVet1[] = {6,3,4,9};
+	//不方便循环啊，跟PPT保持一直的编号的话，maybe 写个 add_edge(egde,index)
+	
+	//中空的下底 E3456
+	for (unsigned int temp = 0; temp<2; temp++)
+	{
+		//E3  E5
+		CP_Arc3D *e3 = new CP_Arc3D(t_origin[temp], vx3d, vy3d, r, startAngle[temp], endAngle[temp]);
+		tv0 = (CP_Vertex *)b.mf_getVertex(vertexArcArr0[temp]);
+		tv1 = (CP_Vertex *)b.mf_getVertex(vertexArcArr1[temp]);
+		te = new CP_Edge(e3, tv0, tv1);
+		b.mf_addEdge(te);
+		tv0->mf_addAdjacentEdge(te);
+		tv1->mf_addAdjacentEdge(te);
+
+		//E4  E6
+		tv0 = (CP_Vertex *)b.mf_getVertex(vertexHor0[temp]);
+		tv1 = (CP_Vertex *)b.mf_getVertex(vertexHor1[temp]);
+	    lineSegment=new CP_LineSegment3D(*(tv0->m_point), *(tv1->m_point));
+	    te=new CP_Edge(lineSegment, tv0, tv1);
+	    b.mf_addEdge(te);
+	    tv0->mf_addAdjacentEdge(te);
+	    tv1->mf_addAdjacentEdge(te);
+	}
+	//竖直的E7,8,9,10
+	for(unsigned int temp=0; temp<4; temp++)
+	{
+		tv0 = (CP_Vertex *)b.mf_getVertex(vertexVet0[temp]);
+		tv1 = (CP_Vertex *)b.mf_getVertex(vertexVet1[temp]);
+	    lineSegment=new CP_LineSegment3D(*(tv0->m_point), *(tv1->m_point));
+	    te=new CP_Edge(lineSegment, tv0, tv1);
+	    b.mf_addEdge(te);
+	    tv0->mf_addAdjacentEdge(te);
+	    tv1->mf_addAdjacentEdge(te);
+
+	}
+	//中空的上底 E11,E12,E13,E14
+	for (unsigned int temp = 2; temp<4; temp++)
+	{
+		//E11  E13
+		CP_Arc3D *e3 = new CP_Arc3D(t_origin[temp], vx3d, vy3d, r, startAngle[temp], endAngle[temp]);
+		tv0 = (CP_Vertex *)b.mf_getVertex(vertexArcArr0[temp]);
+		tv1 = (CP_Vertex *)b.mf_getVertex(vertexArcArr1[temp]);
+		te = new CP_Edge(e3, tv0, tv1);
+		b.mf_addEdge(te);
+		tv0->mf_addAdjacentEdge(te);
+		tv1->mf_addAdjacentEdge(te);
+
+		//E12  E14
+		tv0 = (CP_Vertex *)b.mf_getVertex(vertexHor0[temp]);
+		tv1 = (CP_Vertex *)b.mf_getVertex(vertexHor1[temp]);
+	    lineSegment=new CP_LineSegment3D(*(tv0->m_point), *(tv1->m_point));
+	    te=new CP_Edge(lineSegment, tv0, tv1);
+	    b.mf_addEdge(te);
+	    tv0->mf_addAdjacentEdge(te);
+	    tv1->mf_addAdjacentEdge(te);
+	}
+#pragma endregion  边填充完毕
+
+#pragma region 填充面
+
+	//下底面
+	circle  = new CP_Circle(originLow, vx3d, vy3d, r);
+	tf = new CP_Face(&b, circle, true);
+	b.mf_addFace(tf);
+	CP_Loop * loop = new CP_Loop(tf);
+	tf->mf_addLoop(loop);
+	CP_Circle2D* circle2D = new CP_Circle2D(origin2d, vx2d, vy2d, r);
+	CP_Edge* edge = b.mf_getEdge(0);
+	CP_Coedge* coedge = new CP_Coedge(circle2D, loop, edge, true);
+	loop->mf_addCoedge(coedge);
+	edge->mf_addCoedge(coedge);
+	
+	{
+		//上底面
+		circle = new CP_Circle(originUp, vx3d, vy3d, r);
+		tf = new CP_Face(&b, circle, true);
+		b.mf_addFace(tf);
+		CP_Loop *loop = new CP_Loop(tf);
+		tf->mf_addLoop(loop);
+		CP_Circle2D * circle2D = new CP_Circle2D(origin2d, vx2d, vy2d, r);
+		CP_Edge *edge = b.mf_getEdge(2);
+		CP_Coedge	*coedge = new CP_Coedge(circle2D, loop, edge, true);
+		loop->mf_addCoedge(coedge);
+		edge->mf_addCoedge(coedge);
+	}
+	
+	{
+		//苦逼的f2
+		//空洞的圆柱面
+		CP_CylinderTrimmed *tt = new CP_CylinderTrimmed(originLow,vx3d,vy3d,r,h,u1,u2,u3,u4,v1,v2);
+		tf = new CP_Face(&b, tt, true);
+		b.mf_addFace(tf);
+		loop = new CP_Loop(tf);
+		tf->mf_addLoop(loop);
+		cf_bodyCubeCreate_loop(b, *loop, 0, true, 1, true, 2, false, 1, false);
+		CP_Loop *loop1 = new CP_Loop(tf);
+		tf->mf_addLoop(loop1);
+		cf_bodyCubeCreate_loop(b, *loop1, 3, false, 7, true, 11, true, 8, true);
+		CP_Loop *loop2 = new CP_Loop(tf);
+		tf->mf_addLoop(loop2);
+		cf_bodyCubeCreate_loop(b, *loop2, 5, false, 9, false, 13, true, 10, false);
+	}
+	
+	{
+		//F3 由两个扇形面和 两个两个三角形组成
+		CP_ArcSquSurface * arcSqu = new CP_ArcSquSurface(originCentralBelow, vx3d, vy3d, r, u1, u2);
+		tf = new CP_Face(&b, arcSqu, true);
+		b.mf_addFace(tf);
+		CP_Loop *loop = new CP_Loop(tf);
+		tf->mf_addLoop(loop);
+		//CP_Arc2D里面没有乘以2PI，真垃圾，不统一
+		//e3
+		CP_Arc2D *arc1 = new CP_Arc2D(origin2d, vx2d, vy2d, r, u1*PI2, u2*PI2);
+		//e5
+		CP_Arc2D *arc2 = new CP_Arc2D(origin2d, vx2d, vy2d, r, u3*PI2, u4*PI2);
+		//e4
+		CP_LineSegment2D *line1 = new CP_LineSegment2D(arc1->mf_getEndingPoint(),arc2->mf_getStartingPoint());
+		//e6
+		CP_LineSegment2D *line2 = new CP_LineSegment2D(arc2->mf_getEndingPoint(),arc1->mf_getStartingPoint());
+		cf_bodyCreate_loop(b,*loop,6,line2,true, 3,arc1,true, 4,line1,true, 5,arc2,true);
+	}
+
+	{
+		//f4
+		CP_ArcSquSurface* arcSqu = new CP_ArcSquSurface(originCentralUp, vx3d, vy3d, r, u1, u2);
+		tf = new CP_Face(&b, arcSqu, true);
+		b.mf_addFace(tf);
+		CP_Loop *loop = new CP_Loop(tf);
+		tf->mf_addLoop(loop);
+		//e11
+		CP_Arc2D *arc1 = new CP_Arc2D(origin2d, vx2d, vy2d,r,u1*PI2,u2*PI2);
+		//e13
+		CP_Arc2D *arc2 = new CP_Arc2D(origin2d, vx2d, vy2d, r, u3*PI2, u4*PI2);
+		//e12
+		CP_LineSegment2D *line1 = new CP_LineSegment2D(arc1->mf_getEndingPoint(),arc2->mf_getStartingPoint());
+		//e14
+		CP_LineSegment2D *line2 = new CP_LineSegment2D(arc2->mf_getEndingPoint(),arc1->mf_getStartingPoint());
+		cf_bodyCreate_loop(b,*loop,14,line2,false, 11,arc1,true, 12,line1,true, 13,arc2,true);
+	}
+
+	{
+	//f5
+		CP_Vertex*	tv = (CP_Vertex*)(b.mf_getVertex(4));
+		CP_Point3D cp = *(tv->m_point);
+		tv = (CP_Vertex*)(b.mf_getVertex(3));
+		CP_Vector3D vx = *(tv->m_point) - cp;//x:V3-V4
+		tv = (CP_Vertex*)(b.mf_getVertex(8));
+		CP_Vector3D vy = *(tv->m_point) - cp;//y:V8-V4
+		CP_Plane * plane = new CP_Plane(cp, vx, vy);
+		tf = new CP_Face(&b, plane, true);
+		b.mf_addFace(tf);
+		loop = new CP_Loop(tf);
+		tf->mf_addLoop(loop);
+		cf_bodyCubeCreate_loop(b, *loop,4,true,8,false,12,false,9,true); 
+	}
+	{
+	//f6
+		CP_Vertex*	tv = (CP_Vertex*)(b.mf_getVertex(2));
+		CP_Point3D cp = *(tv->m_point);
+		tv = (CP_Vertex*)(b.mf_getVertex(5));
+		CP_Vector3D vx = *(tv->m_point) - cp;//x:V5-V2
+		tv = (CP_Vertex*)(b.mf_getVertex(6));
+		CP_Vector3D vy = *(tv->m_point) - cp;//y:V6-V2
+		CP_Plane * plane = new CP_Plane(cp, vx, vy);
+		tf = new CP_Face(&b, plane, true);
+		b.mf_addFace(tf);
+		loop = new CP_Loop(tf);
+		tf->mf_addLoop(loop);
+		cf_bodyCubeCreate_loop(b, *loop,6,false,7,true,14,false,10,true); 
+	}
+	
+	
 }
 void cf_bodyCylinderTrimmedDrawSolid(const CP_Body& b)
 {
-
+	glColor3f(1.0, 0.0, 0.0);
+    cf_bodyDrawSurface(b, true);
 }
 void cf_bodyCylinderTrimmedDrawWireframe(const CP_Body& b)
 {
-
+	glColor3f(0.0, 1.0, 0.0);
+    cf_bodyDrawSurface(b, false);
 }
 void cf_bodyCylinderTrimmedDrawEdge(const CP_Body& b)
 {
-
+	glColor3f(0.0, 0.0, 1.0);
+	cf_bodyDrawEdge(b);
 }

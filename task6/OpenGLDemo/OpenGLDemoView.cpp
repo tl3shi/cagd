@@ -27,6 +27,8 @@
 #include "CP_Topology.h"
 #include "CF_BodyDemo.h"
 
+#include "Validate.h";
+
 
 using namespace std;
 
@@ -122,7 +124,8 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glLoadIdentity();
-    glRotated(30, 0.5, 0.5, 0.5); 
+	glTranslated(0.0,-1.0,0.0);
+    glRotated(-30, 0.5, 0.0, -0.1); 
 /*
 	CP_Body b;
     glTranslated(-5.0, 0.0, 0.0);
@@ -133,8 +136,8 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
     glTranslated(5.0, 0.0, 0.0);
     cf_bodyCubeDrawEdge(b);
 */	
+	/*
 	CP_Body b;
-	
 	glTranslated(-5.0, 0.0, 0.0);
 	cf_bodyCylinderCreate(b, 0.0, 0.0, 0.0, 3.0, 2.0);
 	cf_bodyCylinderDrawSolid(b);
@@ -142,7 +145,43 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
 	cf_bodyCylinderDrawWireframe(b);
 	glTranslated(5.0, 0.0, 0.0);
 	cf_bodyCylinderDrawEdge(b);
+	*/
+	
+double u1=0.125, u2=0.375;
+double u3=0.625, u4=0.875;
+double v1=0.375, v2=0.625;
+double h = 4.0, r=1.4;
 
+CP_CylinderTrimmed tt = CP_CylinderTrimmed(CP_Point3D(0,0,0), CP_Vector3D(1,0,0), CP_Vector3D(0,1,0), r,h,u1,u2,u3,u4,v1,v2);
+glTranslated(3.0,5.0,0.0);
+tt.mf_drawSolid();
+glTranslated(-3.0,0.0,0.0);
+tt.mf_drawWireframe();
+
+CP_ArcSquSurface t = 
+	CP_ArcSquSurface(CP_Point3D(0,0,0), CP_Vector3D(1,0,0), CP_Vector3D(0,1,0), r, u1, u2);
+glTranslated(-3.0,0.0,0.0);
+t.mf_drawSolid();
+glTranslated(-3.0,0.0,0.0);
+t.mf_drawWireframe();
+
+
+//�м仭
+glTranslated(0.0,-5.0,0.0);
+
+CP_Body bb;
+	glTranslated(3.0, 0.0, 0.0);
+    cf_bodyCylinderTrimmedCreate(bb, 0.0, 0.0, 0.0, h, r,  u1, u2, v1, v2);
+	//validate_body(bb);
+	cf_bodyCylinderTrimmedDrawSolid(bb);	
+	
+	glTranslated(3.0, 0.0, 0.0);
+	cf_bodyCylinderDrawEdge(bb);
+	
+	glTranslated(3.0, 0.0, 0.0);
+	cf_bodyCylinderDrawWireframe(bb);
+	
+	//cf_bodyCylinderTrimmedCreate(bb, 0.0, 0.0, 0.0, 5, 2, 0.125, 0.375, 0.375, 0.625);
 	SwapBuffers(pDC->m_hDC);
 	wglMakeCurrent(NULL, NULL);
 

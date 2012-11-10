@@ -411,6 +411,8 @@ void CP_Cylinder::mf_drawWireframe( )
 } // 成员函数mf_drawWireframe结束
 // 实现类CP_Cylinder结束
 // ////////////////////////////////////////////////////////////////////////////
+
+
 // ////////////////////////////////////////////////////////////////////////////
 // 实现类CP_Circle开始
 CP_Circle::CP_Circle( ) : m_center(0.0, 0.0, 0.0), m_axisX(1.0, 0.0, 0.0), m_axisY(0.0, 1.0, 0.0), m_radius(1.0)
@@ -499,4 +501,521 @@ void CP_Circle::mf_drawWireframe( )
 	}
 } // 成员函数mf_drawWireframe结束
 // 实现类CP_Circle结束
+/// ////////////////////////////////////////////////////////////////////////////
+
+// 实现类CP_ArcSurface开始
+CP_ArcSurface::CP_ArcSurface( ) : m_center(0.0, 0.0, 0.0), m_axisX(1.0, 0.0, 0.0), m_axisY(0.0, 1.0, 0.0), m_radius(1.0)
+{
+} // 类CP_ArcSurface构造函数结束
+
+CP_ArcSurface::CP_ArcSurface(const CP_Point3D& c, const CP_Vector3D& vx, const CP_Vector3D& vy, double r,double sa, double ea)
+	: m_center(c.m_x, c.m_y, c.m_z), m_axisX(vx.m_x, vx.m_y, vx.m_z), m_axisY(vy.m_x, vy.m_y, vy.m_z), m_radius(r),startAngle(sa),endAngle(ea)
+{
+} // 类CP_ArcSurface构造函数结束
+
+CP_Point3D CP_ArcSurface::mf_getPoint(double u, double v) const
+{
+	double a = startAngle+(endAngle-startAngle)*u;
+	double x = v * m_radius * cos(a * PI2);
+	double y = v * m_radius * sin(a * PI2);
+    return m_center + m_axisX * x + m_axisY * y;
+} // 成员函数mf_getPoint结束
+CP_Point3D CP_ArcSurface::mf_getPoint(const CP_Point2D& uv) const
+{
+	double a = startAngle + (endAngle-startAngle)*uv.m_x;
+	double b = startAngle + (endAngle-startAngle)*uv.m_y;
+	double x = m_radius * cos(a * PI2);
+	double y = m_radius * sin(b * PI2);
+	return m_center + m_axisX*x + m_axisY*y;
+} // 成员函数mf_getPoint结束
+CP_Vector3D CP_ArcSurface::mf_getNormal(double u, double v) const
+{
+	return m_axisX ^ m_axisY;
+} // 成员函数mf_getNormal结束
+CP_Vector3D CP_ArcSurface::mf_getNormal(const CP_Point2D& uv) const
+{
+	return m_axisX ^ m_axisY;
+} // 成员函数mf_getNormal结束
+CP_Vector3D CP_ArcSurface::mf_getUnitNormal(double u, double v) const
+{
+	CP_Vector3D vz = m_axisX ^ m_axisY;
+	vz.mf_normalize();
+	return vz;
+} // 成员函数mf_getUnitNormal结束
+CP_Vector3D CP_ArcSurface::mf_getUnitNormal(const CP_Point2D& uv) const
+{
+	CP_Vector3D vz = m_axisX ^ m_axisY;
+	vz.mf_normalize( );
+	return vz;
+} // 成员函数mf_getUnitNormal结束
+void CP_ArcSurface::mf_drawSolid(bool normalFlag)
+{
+	int i, k;
+	int nu=40;
+	double stepU=1.0/nu;
+	double u;
+	double vv[] = {0.0, 1.0, 1.0};
+	CP_Point3D p;
+	CP_Vector3D v;
+	for(i=0, u=0.0; i<nu; i++, u+=stepU)
+	{
+		double uu[]={u, u, u+stepU};
+		glBegin(GL_POLYGON);
+		for(k=0; k<3; k++)
+		{
+			p=mf_getPoint(uu[k], vv[k]);
+			v=mf_getUnitNormal(uu[k], vv[k]);
+			if(!normalFlag)
+				v*=(-1);
+			glNormal3d(v.m_x, v.m_y, v.m_z);
+			glVertex3d(p.m_x, p.m_y, p.m_z);
+		} // 内层(k)for循环结构结束
+		glEnd();
+	}
+} // 成员函数mf_drawSolid结束束
+void CP_ArcSurface::mf_drawWireframe( )
+{
+	int i, k;
+	int nu=40;
+	double stepU=1.0/nu;
+	double u;
+	double vv[] = {0.0, 1.0, 1.0};
+	CP_Point3D p;
+	glLineWidth(2.2f);
+	for(i=0, u=0.0; i<nu; i++, u+=stepU)
+	{
+		double uu[]={u, u, u+stepU};
+		glBegin(GL_LINE_LOOP);
+		for(k=0; k<3; k++)
+		{
+			p=mf_getPoint(uu[k], vv[k]);
+			glVertex3d(p.m_x, p.m_y, p.m_z);
+		} // 内层(k)for循环结构结束
+		glEnd();
+	}
+} // 成员函数mf_drawWireframe结束
+// 实现类CP_ArcSurface结束
+// /////////////////////////////////////////////
+
+// 实现类CP_ArcSquSurface开始
+CP_ArcSquSurface::CP_ArcSquSurface( ) : m_center(0.0, 0.0, 0.0), m_axisX(1.0, 0.0, 0.0), m_axisY(0.0, 1.0, 0.0), m_radius(1.0)
+{
+} // 类CP_ArcSquSurface构造函数结束
+
+CP_ArcSquSurface::CP_ArcSquSurface(const CP_Point3D& c, const CP_Vector3D& vx, const CP_Vector3D& vy, double r,double sa, double ea)
+	: m_center(c.m_x, c.m_y, c.m_z), m_axisX(vx.m_x, vx.m_y, vx.m_z), m_axisY(vy.m_x, vy.m_y, vy.m_z), m_radius(r),startAngle(sa),endAngle(ea)
+{
+} // 类CP_ArcSquSurface构造函数结束
+
+CP_Point3D CP_ArcSquSurface::mf_getPoint(double u, double v) const
+{
+	double a = startAngle+(endAngle-startAngle)*u;
+	double x = v * m_radius * cos(a * PI2);
+	double y = v * m_radius * sin(a * PI2);
+    return m_center + m_axisX * x + m_axisY * y;
+} // 成员函数mf_getPoint结束
+CP_Point3D CP_ArcSquSurface::mf_getPoint(const CP_Point2D& uv) const
+{
+	double a = startAngle + (endAngle-startAngle)*uv.m_x;
+	double b = startAngle + (endAngle-startAngle)*uv.m_y;
+	double x = m_radius * cos(a * PI2);
+	double y = m_radius * sin(b * PI2);
+	return m_center + m_axisX*x + m_axisY*y;
+} // 成员函数mf_getPoint结束
+CP_Vector3D CP_ArcSquSurface::mf_getNormal(double u, double v) const
+{
+	return m_axisX ^ m_axisY;
+} // 成员函数mf_getNormal结束
+CP_Vector3D CP_ArcSquSurface::mf_getNormal(const CP_Point2D& uv) const
+{
+	return m_axisX ^ m_axisY;
+} // 成员函数mf_getNormal结束
+CP_Vector3D CP_ArcSquSurface::mf_getUnitNormal(double u, double v) const
+{
+	CP_Vector3D vz = m_axisX ^ m_axisY;
+	vz.mf_normalize();
+	return vz;
+} // 成员函数mf_getUnitNormal结束
+CP_Vector3D CP_ArcSquSurface::mf_getUnitNormal(const CP_Point2D& uv) const
+{
+	CP_Vector3D vz = m_axisX ^ m_axisY;
+	vz.mf_normalize( );
+	return vz;
+} // 成员函数mf_getUnitNormal结束
+void CP_ArcSquSurface::mf_drawSolid(bool normalFlag)
+{
+	int i, k;
+	int nu=40;
+	double stepU=1.0/nu;
+	double u;
+	double vv[] = {0.0, 1.0, 1.0};
+	CP_Point3D p;
+	CP_Vector3D v;
+	
+	for(i=0, u=0.0; i<nu; i++, u+=stepU)
+	{
+		double uu[]={u, u, u+stepU};
+		glBegin(GL_POLYGON);
+		for(k=0; k<3; k++)
+		{
+			p=mf_getPoint(uu[k], vv[k]);
+			v=mf_getUnitNormal(uu[k], vv[k]);
+			if(!normalFlag)
+				v*=(-1);
+			glNormal3d(v.m_x, v.m_y, v.m_z);
+			glVertex3d(p.m_x, p.m_y, p.m_z);
+		} // 内层(k)for循环结构结束
+		glEnd();
+	}
+	//计算endAngle+Pi的那个点的参数
+	//end + Pi(1/2 * 2Pi) = start + (end-start)*u ===> u =1.0+0.5/end-start 
+	glBegin(GL_TRIANGLES);
+	{				//center start 对称的endangle
+		double uu[] = {0.0,0.0,1.0 + 0.5/(endAngle-startAngle)};
+		double vvv[] = {0.0,1.0,1.0};
+		for (k = 0; k<3; k++)
+		{
+			p=mf_getPoint(uu[k], vvv[k]);
+			v=mf_getUnitNormal(uu[k], vvv[k]);
+			if(!normalFlag)
+				v*=(-1);
+			glNormal3d(v.m_x, v.m_y, v.m_z);
+			glVertex3d(p.m_x, p.m_y, p.m_z);
+		}
+	}	
+	glEnd();
+	
+	glBegin(GL_TRIANGLES);
+	{				//center end 对称的startangle
+		double uu[] = {0.0,1.0, 0.5/(endAngle-startAngle)};
+		double vvv[] = {0.0,1.0,1.0};
+		for (k = 0; k<3; k++)
+		{
+			p=mf_getPoint(uu[k], vvv[k]);
+			v=mf_getUnitNormal(uu[k], vvv[k]);
+			if(!normalFlag)
+				v*=(-1);
+			glNormal3d(v.m_x, v.m_y, v.m_z);
+			glVertex3d(p.m_x, p.m_y, p.m_z);
+		}
+	}	
+	glEnd();
+	double sa = this->startAngle;
+	this->startAngle=1-sa; //u3
+	double ea = this->endAngle;
+	this->endAngle=1-ea;//u4
+	for(i=0, u=0.0; i<nu; i++, u+=stepU)
+	{
+		double uu[]={u, u, u+stepU};
+		glBegin(GL_POLYGON);
+		for(k=0; k<3; k++)
+		{
+			p=mf_getPoint(uu[k], vv[k]);
+			v=mf_getUnitNormal(uu[k], vv[k]);
+			if(!normalFlag)
+				v*=(-1);
+			glNormal3d(v.m_x, v.m_y, v.m_z);
+			glVertex3d(p.m_x, p.m_y, p.m_z);
+		} // 内层(k)for循环结构结束
+		glEnd();
+	}
+	this->startAngle = sa;
+	this->endAngle = ea;
+	/*	
+	//对称再画扇形
+	用rotation 方法画不知道是否正确?
+	*/	
+
+} // 成员函数mf_drawSolid结束束
+void CP_ArcSquSurface::mf_drawWireframe( )
+{
+	int i, k;
+	int nu=10;
+	double stepU=1.0/nu;
+	double u;
+	double vv[] = {0.0, 1.0, 1.0};
+	CP_Point3D p;
+	CP_Vector3D v;
+	
+	for(i=0, u=0.0; i<nu; i++, u+=stepU)
+	{
+		double uu[]={u, u, u+stepU};
+		glBegin(GL_LINE_LOOP);
+		for(k=0; k<3; k++)
+		{
+			p=mf_getPoint(uu[k], vv[k]);
+			v=mf_getUnitNormal(uu[k], vv[k]);
+		
+			glNormal3d(v.m_x, v.m_y, v.m_z);
+			glVertex3d(p.m_x, p.m_y, p.m_z);
+		} // 内层(k)for循环结构结束
+		glEnd();
+	}
+	//计算endAngle+Pi的那个点的参数
+	//end + Pi(1/2 * 2Pi) = start + (end-start)*u ===> u =1.0+0.5/end-start 
+	for(i=0, u=0.0; i<nu; i++, u+=stepU)
+	{
+		glBegin(GL_LINE_LOOP);
+		{				//center start 对称的endangle
+			double uu[] = {0.0,0.0,1.0 + 0.5/(endAngle-startAngle)};
+			double vvv[] = {0.0,1.0,1.0};
+			for (k = 0; k<3; k++)
+			{
+				p=mf_getPoint(uu[k], vvv[k]);
+				v=mf_getUnitNormal(uu[k], vvv[k]);
+			
+				glNormal3d(v.m_x, v.m_y, v.m_z);
+				glVertex3d(p.m_x, p.m_y, p.m_z);
+			}
+		}	
+		glEnd();
+	}	
+	glBegin(GL_LINE_LOOP);
+	{				//center end 对称的startangle
+		double uu[] = {0.0,1.0, 0.5/(endAngle-startAngle)};
+		double vvv[] = {0.0,1.0,1.0};
+		for (k = 0; k<3; k++)
+		{
+			p=mf_getPoint(uu[k], vvv[k]);
+			v=mf_getUnitNormal(uu[k], vvv[k]);
+		
+			glNormal3d(v.m_x, v.m_y, v.m_z);
+			glVertex3d(p.m_x, p.m_y, p.m_z);
+		}
+	}	
+	glEnd();
+	double sa = this->startAngle;
+	this->startAngle=1-sa; //u3
+	double ea = this->endAngle;
+	this->endAngle=1-ea;//u4
+	for(i=0, u=0.0; i<nu; i++, u+=stepU)
+	{
+		double uu[]={u, u, u+stepU};
+		glBegin(GL_LINE_LOOP);
+		for(k=0; k<3; k++)
+		{
+			p=mf_getPoint(uu[k], vv[k]);
+			v=mf_getUnitNormal(uu[k], vv[k]);
+			
+			glNormal3d(v.m_x, v.m_y, v.m_z);
+			glVertex3d(p.m_x, p.m_y, p.m_z);
+		} // 内层(k)for循环结构结束
+		glEnd();
+	}
+	this->startAngle = sa;
+	this->endAngle = ea;
+} // 成员函数mf_drawWireframe结束
+// 实现类CP_ArcSquSurface结束
+// /////////////////////////////////////////////
+
+
+
+// 实现类CP_CylinderTrimmed开始
+CP_CylinderTrimmed::CP_CylinderTrimmed( ): m_center(0.0, 0.0, 0.0), m_axisX(1.0, 0.0, 0.0), m_axisY(0.0, 1.0, 0.0), m_radius(1.0), m_height(3.0)
+{
+} // 类CP_CylinderTrimmed构造函数结束
+CP_CylinderTrimmed::CP_CylinderTrimmed(const CP_Point3D& c, const CP_Vector3D& vx, const CP_Vector3D& vy, double r, double h,double u1,double u2,double u3,double u4,double v1,double v2)
+	: m_center(c.m_x, c.m_y, c.m_z), m_axisX(vx.m_x, vx.m_y, vx.m_z), m_axisY(vy.m_x, vy.m_y, vy.m_z), m_radius(r), m_height(h)
+	,m_u1(u1),m_u2(u2),m_u3(u3),m_u4(u4),m_v1(v1),m_v2(v2)
+{
+} // 类CP_CylinderTrimmed构造函数结束
+CP_Point3D CP_CylinderTrimmed::mf_getPoint(double u, double v) const
+{
+	if ((v > m_v1 && v < m_v2) &&
+		(u < m_u2 && u > m_u1 || u < m_u4 && u > m_u3 ))
+		return NULL;
+
+	double x = m_radius * cos(u * PI2);
+	double y = m_radius * sin(u * PI2);
+	double z = v * m_height;
+	CP_Vector3D vz = m_axisX ^ m_axisY;
+	return m_center + m_axisX*x + m_axisY*y +vz*z;
+} // 成员函数mf_getPoint结束
+CP_Point3D CP_CylinderTrimmed::mf_getPoint(const CP_Point2D& uv) const
+{
+	return mf_getPoint(uv.m_x, uv.m_y);
+} // 成员函数mf_getPoint结束
+CP_Vector3D CP_CylinderTrimmed::mf_getNormal(double u, double v) const
+{
+	if ((v > m_v1 && v < m_v2) &&
+		(u < m_u2 && u > m_u1 || u < m_u4 && u > m_u3 ))
+		return NULL;
+	return m_axisX * cos(u*PI2) + m_axisY * sin(u*PI2);
+} // 成员函数mf_getNormal结束
+CP_Vector3D CP_CylinderTrimmed::mf_getNormal(const CP_Point2D& uv) const
+{
+	return mf_getNormal(uv.m_x, uv.m_y);
+	return m_axisX * cos(uv.m_x*PI2) + m_axisY * sin(uv.m_x*PI2);
+} // 成员函数mf_getNormal结束
+CP_Vector3D CP_CylinderTrimmed::mf_getUnitNormal(double u, double v) const
+{
+	CP_Vector3D vz = mf_getNormal(u, v);
+	vz.mf_normalize( );
+	return vz;
+} // 成员函数mf_getUnitNormal结束
+CP_Vector3D CP_CylinderTrimmed::mf_getUnitNormal(const CP_Point2D& uv) const
+{
+	CP_Vector3D vz = mf_getNormal(uv);
+	vz.mf_normalize( );
+	return vz;
+} // 成员函数mf_getUnitNormal结束
+
+void CP_CylinderTrimmed::mf_drawSolid(bool normalFlag)
+{
+	int m_numOfSegment = 40;
+	double step = 1.0 / m_numOfSegment;
+
+	double u = 0;
+	double vv[] = {0.0, 0.0, 1.0, 1.0, 0.0};
+	double vv2[] = {0.0, 0.0, m_v1, m_v1, 0.0};
+	double vv3[] = {m_v2, m_v2, 1.0, 1.0, m_v2};
+	CP_Point3D p;
+	CP_Vector3D v;
+
+	for(int i = 0; i < m_numOfSegment; ++i) 
+	{
+		double uu[] = {u, u + step, u + step, u, u};
+		// Draw 4 triangles 上下两个三角形
+		if (u <= m_u2 && u >= m_u1 || u <= m_u4 && u >= m_u3) 
+		{
+			glBegin(GL_POLYGON);
+			for (int k = 0; k < 3; ++k) {
+				p = mf_getPoint(uu[k], vv2[k]);
+				v = mf_getUnitNormal(uu[k], vv2[k]);
+				if (!normalFlag)
+					v*=(-1);
+				glNormal3d(v.m_x, v.m_y, v.m_z);
+				glVertex3d(p.m_x, p.m_y, p.m_z);
+			}
+			glEnd();
+			glBegin(GL_POLYGON);
+			for (int k = 2; k < 5; k++) {
+				p = mf_getPoint(uu[k], vv2[k]);
+				v = mf_getUnitNormal(uu[k], vv2[k]);
+				if (!normalFlag)
+					v*=(-1);
+				glNormal3d(v.m_x, v.m_y, v.m_z);
+				glVertex3d(p.m_x, p.m_y, p.m_z);
+			}
+			glEnd();
+			glBegin(GL_POLYGON);
+			for (int k = 0; k < 3; ++k) {
+				p = mf_getPoint(uu[k], vv3[k]);
+				v = mf_getUnitNormal(uu[k], vv3[k]);
+				if (!normalFlag)
+					v*=(-1);
+				glNormal3d(v.m_x, v.m_y, v.m_z);
+				glVertex3d(p.m_x, p.m_y, p.m_z);
+			}
+			glEnd();
+			glBegin(GL_POLYGON);
+			for (int k = 2; k < 5; k++) {
+				p = mf_getPoint(uu[k], vv3[k]);
+				v = mf_getUnitNormal(uu[k], vv3[k]);
+				if (!normalFlag)
+					v*=(-1);
+				glNormal3d(v.m_x, v.m_y, v.m_z);
+				glVertex3d(p.m_x, p.m_y, p.m_z);
+			}
+			glEnd();
+		}// Draw two triangles 
+		else {
+			glBegin(GL_POLYGON);
+			for (int k = 0; k < 3; ++k) {
+				p = mf_getPoint(uu[k], vv[k]);
+				v = mf_getUnitNormal(uu[k], vv[k]);
+				if (!normalFlag)
+					v*=(-1);
+				glNormal3d(v.m_x, v.m_y, v.m_z);
+				glVertex3d(p.m_x, p.m_y, p.m_z);
+			}
+			glEnd();
+			glBegin(GL_POLYGON);
+			for (int k = 2; k < 5; k++) {
+				p = mf_getPoint(uu[k], vv[k]);
+				v = mf_getUnitNormal(uu[k], vv[k]);
+				if (!normalFlag)
+					v*=(-1);
+				glNormal3d(v.m_x, v.m_y, v.m_z);
+				glVertex3d(p.m_x, p.m_y, p.m_z);
+			}
+			glEnd();
+		}
+		u+= step;
+	}
+} // 成员函数mf_drawSolid结束
+void CP_CylinderTrimmed::mf_drawWireframe( )
+{
+	int m_numOfSegment = 40;
+	double step = 1.0 / m_numOfSegment;
+
+	double u = 0;
+	double vv[] = {0.0, 0.0, 1.0, 1.0, 0.0};
+	double vv2[] = {0.0, 0.0, m_v1, m_v1, 0.0};
+	double vv3[] = {m_v2, m_v2, 1.0, 1.0, m_v2};
+	CP_Point3D p;
+	CP_Vector3D v;
+
+	for(int i = 0; i < m_numOfSegment; ++i) 
+	{
+		double uu[] = {u, u + step, u + step, u, u};
+		// Draw 4 triangles 上下各两个三角形
+		if (u <= m_u2 && u >= m_u1 || u <= m_u4 && u >= m_u3) 
+		{
+			glBegin(GL_LINE_LOOP);
+			for (int k = 0; k < 3; ++k) {
+				p = mf_getPoint(uu[k], vv2[k]);
+				v = mf_getUnitNormal(uu[k], vv2[k]);
+				glNormal3d(v.m_x, v.m_y, v.m_z);
+				glVertex3d(p.m_x, p.m_y, p.m_z);
+			}
+			glEnd();
+			glBegin(GL_LINE_LOOP);
+			for (int k = 2; k < 5; k++) {
+				p = mf_getPoint(uu[k], vv2[k]);
+				v = mf_getUnitNormal(uu[k], vv2[k]);
+				glNormal3d(v.m_x, v.m_y, v.m_z);
+				glVertex3d(p.m_x, p.m_y, p.m_z);
+			}
+			glEnd();
+			glBegin(GL_LINE_LOOP);
+			for (int k = 0; k < 3; ++k) {
+				p = mf_getPoint(uu[k], vv3[k]);
+				v = mf_getUnitNormal(uu[k], vv3[k]);
+				glNormal3d(v.m_x, v.m_y, v.m_z);
+				glVertex3d(p.m_x, p.m_y, p.m_z);
+			}
+			glEnd();
+			glBegin(GL_LINE_LOOP);
+			for (int k = 2; k < 5; k++) {
+				p = mf_getPoint(uu[k], vv3[k]);
+				v = mf_getUnitNormal(uu[k], vv3[k]);
+				glNormal3d(v.m_x, v.m_y, v.m_z);
+				glVertex3d(p.m_x, p.m_y, p.m_z);
+			}
+			glEnd();
+		}// Draw two triangles 左边 和右边的情况，跟圆柱面一样
+		else {
+			glBegin(GL_LINE_LOOP);
+			for (int k = 0; k < 3; ++k) {
+				p = mf_getPoint(uu[k], vv[k]);
+				v = mf_getUnitNormal(uu[k], vv[k]);
+				glNormal3d(v.m_x, v.m_y, v.m_z);
+				glVertex3d(p.m_x, p.m_y, p.m_z);
+			}
+			glEnd();
+			glBegin(GL_LINE_LOOP);
+			for (int k = 2; k < 5; k++) {
+				p = mf_getPoint(uu[k], vv[k]);
+				v = mf_getUnitNormal(uu[k], vv[k]);
+				glNormal3d(v.m_x, v.m_y, v.m_z);
+				glVertex3d(p.m_x, p.m_y, p.m_z);
+			}
+			glEnd();
+		}
+		u+= step;
+	}
+	
+} // 成员函数mf_drawWireframe结束
+// 实现类CP_CylinderTrimmed结束
 // ////////////////////////////////////////////////////////////////////////////

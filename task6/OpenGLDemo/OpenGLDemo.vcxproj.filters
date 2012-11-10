@@ -135,9 +135,6 @@
     <ClInclude Include="PropertiesWnd.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\CP_PointVector.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="CP_Curve2D.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -151,6 +148,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CP_Curve3D.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CP_PointVector.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Validate.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

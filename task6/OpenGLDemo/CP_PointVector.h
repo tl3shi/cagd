@@ -75,11 +75,13 @@ public:
 };
 
 extern CP_Point2D operator + (const CP_Point2D& pt, const CP_Vector2D& v);
+extern bool operator == (const CP_Point2D& u, const CP_Point2D& v);
 extern CP_Point2D operator - (const CP_Point2D& pt, const CP_Vector2D& v);
 extern CP_Vector2D operator - (const CP_Point2D& p, const CP_Point2D& q);
 
 extern CP_Point3D operator + (const CP_Point3D& pt, const CP_Vector3D& v);
 extern CP_Point3D operator - (const CP_Point3D& pt, const CP_Vector3D& v);
+extern bool operator == (const CP_Point3D& u, const CP_Point3D& v);
 extern CP_Vector3D operator - (const CP_Point3D& p, const CP_Point3D& q);
 
 extern CP_Vector2D operator + (const CP_Vector2D& u, const CP_Vector2D& v); 

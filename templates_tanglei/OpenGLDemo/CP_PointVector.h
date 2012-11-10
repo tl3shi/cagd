@@ -75,6 +75,7 @@ public:
 };
 
 extern CP_Point2D operator + (const CP_Point2D& pt, const CP_Vector2D& v);
+extern bool operator == (const CP_Point2D& u, const CP_Point2D& v);
 extern CP_Point2D operator - (const CP_Point2D& pt, const CP_Vector2D& v);
 extern CP_Vector2D operator - (const CP_Point2D& p, const CP_Point2D& q);
 

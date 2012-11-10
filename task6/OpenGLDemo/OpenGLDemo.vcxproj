@@ -124,12 +124,12 @@
     <None Include="UserImages.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\CP_PointVector.h" />
     <ClInclude Include="CF_BodyDemo.h" />
     <ClInclude Include="ChildFrm.h" />
     <ClInclude Include="ClassView.h" />
     <ClInclude Include="CP_Curve2D.h" />
     <ClInclude Include="CP_Curve3D.h" />
+    <ClInclude Include="CP_PointVector.h" />
     <ClInclude Include="CP_Topology.h" />
     <ClInclude Include="FileView.h" />
     <ClInclude Include="MainFrm.h" />
@@ -142,6 +142,7 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Validate.h" />
     <ClInclude Include="ViewTree.h" />
   </ItemGroup>
   <ItemGroup>
