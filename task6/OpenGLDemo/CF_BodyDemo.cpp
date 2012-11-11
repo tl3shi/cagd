@@ -377,7 +377,7 @@ void cf_bodyCylinderTrimmedCreate(CP_Body& b, double cx, double cy, double cz, d
 	
 	CP_Vector2D vx2d = CP_Vector2D(1,0);
 	CP_Vector2D vy2d = CP_Vector2D(0,1);
-
+	//没写循环，方便调试
 #pragma region 填充顶点
 	//下顶点
 	CP_Point3D p0 = CP_Point3D(cx+r,cy,cz);
@@ -468,7 +468,7 @@ void cf_bodyCylinderTrimmedCreate(CP_Body& b, double cx, double cy, double cz, d
 	//四个竖直线段	E7,E8,E9,E10
 	int vertexVet0[] = {2,7,8,5};
 	int vertexVet1[] = {6,3,4,9};
-	//不方便循环啊，跟PPT保持一直的编号的话，maybe 写个 add_edge(egde,index)
+	//不方便循环啊，maybe 写个 add_edge(egde,index)
 	
 	//中空的下底 E3456
 	for (unsigned int temp = 0; temp<2; temp++)
@@ -536,7 +536,7 @@ void cf_bodyCylinderTrimmedCreate(CP_Body& b, double cx, double cy, double cz, d
 	tf->mf_addLoop(loop);
 	CP_Circle2D* circle2D = new CP_Circle2D(origin2d, vx2d, vy2d, r);
 	CP_Edge* edge = b.mf_getEdge(0);
-	CP_Coedge* coedge = new CP_Coedge(circle2D, loop, edge, true);
+	CP_Coedge* coedge = new CP_Coedge(circle2D, loop, edge, false);
 	loop->mf_addCoedge(coedge);
 	edge->mf_addCoedge(coedge);
 	
@@ -562,6 +562,7 @@ void cf_bodyCylinderTrimmedCreate(CP_Body& b, double cx, double cy, double cz, d
 		b.mf_addFace(tf);
 		loop = new CP_Loop(tf);
 		tf->mf_addLoop(loop);
+		//符合右手定则，法向量指向体外
 		cf_bodyCubeCreate_loop(b, *loop, 0, true, 1, true, 2, false, 1, false);
 		CP_Loop *loop1 = new CP_Loop(tf);
 		tf->mf_addLoop(loop1);
@@ -621,7 +622,7 @@ void cf_bodyCylinderTrimmedCreate(CP_Body& b, double cx, double cy, double cz, d
 		b.mf_addFace(tf);
 		loop = new CP_Loop(tf);
 		tf->mf_addLoop(loop);
-		cf_bodyCubeCreate_loop(b, *loop,4,true,8,false,12,false,9,true); 
+		cf_bodyCubeCreate_loop(b, *loop,4,false,8,false,12,true,9,true); 
 	}
 	{
 	//f6
@@ -636,7 +637,7 @@ void cf_bodyCylinderTrimmedCreate(CP_Body& b, double cx, double cy, double cz, d
 		b.mf_addFace(tf);
 		loop = new CP_Loop(tf);
 		tf->mf_addLoop(loop);
-		cf_bodyCubeCreate_loop(b, *loop,6,false,7,true,14,false,10,true); 
+		cf_bodyCubeCreate_loop(b, *loop,6,false,10,true,14,false,7,false); 
 	}
 	
 	

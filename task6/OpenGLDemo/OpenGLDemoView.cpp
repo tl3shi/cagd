@@ -120,11 +120,13 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
 		return;
     wglMakeCurrent(pDC->m_hDC, m_hRC);
     
+	initLights();
+
 	glClearColor(0,0,0,0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glLoadIdentity();
-	glTranslated(0.0,-1.0,0.0);
+	glTranslated(0.0,-2.0,0.0);
     glRotated(-30, 0.5, 0.0, -0.1); 
 /*
 	CP_Body b;
@@ -146,7 +148,6 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
 	glTranslated(5.0, 0.0, 0.0);
 	cf_bodyCylinderDrawEdge(b);
 	*/
-	
 double u1=0.125, u2=0.375;
 double u3=0.625, u4=0.875;
 double v1=0.375, v2=0.625;
@@ -167,12 +168,12 @@ t.mf_drawWireframe();
 
 
 //�м仭
-glTranslated(0.0,-5.0,0.0);
+glTranslated(0.0,-6.0,0.0);
 
 CP_Body bb;
 	glTranslated(3.0, 0.0, 0.0);
     cf_bodyCylinderTrimmedCreate(bb, 0.0, 0.0, 0.0, h, r,  u1, u2, v1, v2);
-	//validate_body(bb);
+	validate_body(bb);
 	cf_bodyCylinderTrimmedDrawSolid(bb);	
 	
 	glTranslated(3.0, 0.0, 0.0);
@@ -181,7 +182,6 @@ CP_Body bb;
 	glTranslated(3.0, 0.0, 0.0);
 	cf_bodyCylinderDrawWireframe(bb);
 	
-	//cf_bodyCylinderTrimmedCreate(bb, 0.0, 0.0, 0.0, 5, 2, 0.125, 0.375, 0.375, 0.625);
 	SwapBuffers(pDC->m_hDC);
 	wglMakeCurrent(NULL, NULL);
 
