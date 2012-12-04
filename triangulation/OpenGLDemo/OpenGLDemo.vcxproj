@@ -124,12 +124,13 @@
     <None Include="UserImages.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\CP_PointVector.h" />
+    <ClInclude Include="CF_BodyDemo.h" />
     <ClInclude Include="ChildFrm.h" />
     <ClInclude Include="ClassView.h" />
     <ClInclude Include="CP_Curve2D.h" />
     <ClInclude Include="CP_Curve3D.h" />
-    <ClInclude Include="CP_PointVector.h" />
-    <ClInclude Include="DelaunayTriangle.h" />
+    <ClInclude Include="CP_Topology.h" />
     <ClInclude Include="FileView.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="OpenGLDemo.h" />
@@ -141,16 +142,16 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="triangle.h" />
     <ClInclude Include="ViewTree.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CF_BodyDemo.cpp" />
     <ClCompile Include="ChildFrm.cpp" />
     <ClCompile Include="ClassView.cpp" />
     <ClCompile Include="CP_Curve2D.cpp" />
     <ClCompile Include="CP_Curve3D.cpp" />
     <ClCompile Include="CP_PointVector.cpp" />
-    <ClCompile Include="DelaunayTriangle.cpp" />
+    <ClCompile Include="CP_Topology.cpp" />
     <ClCompile Include="FileView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="OpenGLDemo.cpp" />
@@ -163,7 +164,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="triangle.c" />
     <ClCompile Include="ViewTree.cpp" />
   </ItemGroup>
   <ItemGroup>
