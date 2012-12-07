@@ -152,6 +152,7 @@
     <ClCompile Include="CP_Curve3D.cpp" />
     <ClCompile Include="CP_PointVector.cpp" />
     <ClCompile Include="CP_Topology.cpp" />
+    <ClCompile Include="DataStructure.cpp" />
     <ClCompile Include="FileView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="OpenGLDemo.cpp" />
