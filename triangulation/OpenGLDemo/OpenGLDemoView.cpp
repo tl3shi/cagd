@@ -21,11 +21,7 @@
 #include <math.h>
 
 #include "GL/GLU.H" // 已经包含GL/GL.h
-#include "CP_Curve2D.h"
-#include "CP_Curve3D.h"
-#include "CP_Surface3D.h"
-#include "CP_Topology.h"
-#include "CF_BodyDemo.h"
+#include <gl/glut.h>
 
 
 using namespace std;
@@ -109,7 +105,16 @@ void initLights()
     // Setting lights and materials ends
     // ****************************************************
 }
-
+void grawString(int x, int y, char* str)
+{
+    glColor3d(0.0, 0.0, 0.0);
+    int n = strlen(str);  
+    //设置要在屏幕上显示字符的起始位置 
+    glRasterPos2i(x,y);  
+    //逐个显示字符串中的每个字符  
+    for (int i = 0; i < n; i++)  
+        glutBitmapCharacter(GLUT_BITMAP_8_BY_13, *(str+i)); 
+}
 void COpenGLDemoView::OnDraw(CDC* pDC)
 {
 	COpenGLDemoDoc* pDoc = GetDocument();
@@ -118,31 +123,12 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
 		return;
     wglMakeCurrent(pDC->m_hDC, m_hRC);
     
-	glClearColor(0,0,0,0);
+	glClearColor(1,1,1,0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glLoadIdentity();
-    glRotated(30, 0.5, 0.5, 0.5); 
-/*
-	CP_Body b;
-    glTranslated(-5.0, 0.0, 0.0);
-    cf_bodyCubeCreate(b, 0.0, 0.0, 0.0, 4.0);
-    cf_bodyCubeDrawSolid(b);
-    glTranslated(5.0, 0.0, 0.0);
-    cf_bodyCubeDrawWireframe(b);
-    glTranslated(5.0, 0.0, 0.0);
-    cf_bodyCubeDrawEdge(b);
-*/	
-	CP_Body b;
-	
-	glTranslated(-5.0, 0.0, 0.0);
-	cf_bodyCylinderCreate(b, 0.0, 0.0, 0.0, 3.0, 1.0);
-	cf_bodyCylinderDrawSolid(b);
-	glTranslated(5.0, 0.0, 0.0);
-	cf_bodyCylinderDrawWireframe(b);
-	glTranslated(5.0, 0.0, 0.0);
-	cf_bodyCylinderDrawEdge(b);
-
+    grawString(0,0,"tanglei");
+    
 	SwapBuffers(pDC->m_hDC);
 	wglMakeCurrent(NULL, NULL);
 
@@ -292,7 +278,8 @@ void COpenGLDemoView::OnSize(UINT nType, int cx, int cy)
 	double d=10;
 	double n=100;
 
-	glOrtho(-cx/n, cx/n, -cy/n, cy/n, -d, d);
+	//glOrtho(-cx/n, cx/n, -cy/n, cy/n, -d, d);
+    gluOrtho2D(0,cx,0,cy);
 
 	glMatrixMode(GL_MODELVIEW);
 	glViewport(0, 0, cx, cy);

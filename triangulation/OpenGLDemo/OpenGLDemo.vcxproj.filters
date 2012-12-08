@@ -138,21 +138,6 @@
     <ClInclude Include="..\..\CP_PointVector.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="CP_Curve2D.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CP_Surface3D.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CP_Topology.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CF_BodyDemo.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CP_Curve3D.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="OpenGLDemo.cpp">
@@ -188,22 +173,7 @@
     <ClCompile Include="PropertiesWnd.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="CP_Curve2D.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="CP_PointVector.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CP_Surface3D.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CP_Topology.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CF_BodyDemo.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CP_Curve3D.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="DataStructure.cpp">

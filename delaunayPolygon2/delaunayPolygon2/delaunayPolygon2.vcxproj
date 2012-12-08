@@ -11,15 +11,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{4D2B3B6A-5717-43F8-869F-91417F5339A5}</ProjectGuid>
-    <RootNamespace>OpenGLDemo</RootNamespace>
+    <ProjectGuid>{64A929A9-F8F8-49AC-B984-B9D12F2A0A4E}</ProjectGuid>
+    <RootNamespace>delaunayPolygon2</RootNamespace>
     <Keyword>MFCProj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -55,7 +55,6 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OpenGL32.Lib;GlU32.Lib</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -96,76 +95,35 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
-    <None Include="res\classview.bmp" />
-    <None Include="res\classview_hc.bmp" />
-    <None Include="res\class_view.ico" />
-    <None Include="res\class_view_hc.ico" />
-    <None Include="res\explorer.bmp" />
-    <None Include="res\explorer_hc.bmp" />
-    <None Include="res\fileview.bmp" />
-    <None Include="res\fileview_hc.bmp" />
-    <None Include="res\file_view.ico" />
-    <None Include="res\file_view_hc.ico" />
-    <None Include="res\menuimages.bmp" />
-    <None Include="res\menuimages_hc.bmp" />
-    <None Include="res\OpenGLDemo.ico" />
-    <None Include="res\OpenGLDemo.rc2" />
-    <None Include="res\OpenGLDemoDoc.ico" />
-    <None Include="res\output_wnd.ico" />
-    <None Include="res\output_wnd_hc.ico" />
-    <None Include="res\properties.bmp" />
-    <None Include="res\properties_hc.bmp" />
-    <None Include="res\properties_wnd.ico" />
-    <None Include="res\properties_wnd_hc.ico" />
-    <None Include="res\sort.bmp" />
-    <None Include="res\sort_hc.bmp" />
-    <None Include="res\Toolbar.bmp" />
-    <None Include="res\Toolbar256.bmp" />
-    <None Include="UserImages.bmp" />
+    <None Include="res\delaunayPolygon2.ico" />
+    <None Include="res\delaunayPolygon2.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\CP_PointVector.h" />
-    <ClInclude Include="ChildFrm.h" />
-    <ClInclude Include="ClassView.h" />
-    <ClInclude Include="FileView.h" />
-    <ClInclude Include="MainFrm.h" />
-    <ClInclude Include="OpenGLDemo.h" />
-    <ClInclude Include="OpenGLDemoDoc.h" />
-    <ClInclude Include="OpenGLDemoView.h" />
-    <ClInclude Include="OutputWnd.h" />
-    <ClInclude Include="PropertiesWnd.h" />
+    <ClInclude Include="delaunayPolygon2.h" />
+    <ClInclude Include="delaunayPolygon2Dlg.h" />
+    <ClInclude Include="Node.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="ViewTree.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ChildFrm.cpp" />
-    <ClCompile Include="ClassView.cpp" />
-    <ClCompile Include="CP_PointVector.cpp" />
-    <ClCompile Include="DataStructure.cpp" />
-    <ClCompile Include="FileView.cpp" />
-    <ClCompile Include="MainFrm.cpp" />
-    <ClCompile Include="OpenGLDemo.cpp" />
-    <ClCompile Include="OpenGLDemoDoc.cpp" />
-    <ClCompile Include="OpenGLDemoView.cpp" />
-    <ClCompile Include="OutputWnd.cpp" />
-    <ClCompile Include="PropertiesWnd.cpp" />
+    <ClCompile Include="delaunayPolygon2.cpp" />
+    <ClCompile Include="delaunayPolygon2Dlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="ViewTree.cpp" />
+    <ClCompile Include="Triangulation.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="OpenGLDemo.rc" />
+    <ResourceCompile Include="delaunayPolygon2.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties RESOURCE_FILE="OpenGLDemo.rc" />
+      <UserProperties RESOURCE_FILE="delaunayPolygon2.rc" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>
