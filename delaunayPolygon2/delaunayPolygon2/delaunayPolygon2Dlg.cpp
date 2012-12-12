@@ -14,8 +14,6 @@
 #define new DEBUG_NEW
 #endif
 
-#define BLACK 1;
-#define RED 2;
 
 bool bcandraw=true;//ÄÜ·ñ»æÍ¼
 CObList *mpNodeList,*mpTriList,*mpCandidateNode,*mpCandidateNode2,*mpEdgeList;
@@ -543,3 +541,4 @@ void CdelaunayPolygon2Dlg::OnLButtonDown(UINT nFlags, CPoint point)
         CDialog::OnLButtonDown(nFlags, point);
     }
 }
+

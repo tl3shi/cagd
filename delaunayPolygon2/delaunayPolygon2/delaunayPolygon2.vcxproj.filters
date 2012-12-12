@@ -39,7 +39,7 @@
     <ClInclude Include="Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Node.h">
+    <ClInclude Include="DataStructure.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

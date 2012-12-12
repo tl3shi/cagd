@@ -138,6 +138,9 @@
     <ClInclude Include="..\..\CP_PointVector.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="DataStructureDelaunay.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="OpenGLDemo.cpp">
@@ -177,6 +180,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="DataStructure.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TriangulationDelaunay.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -36,4 +36,5 @@ public:
 	afx_msg void OnBnClickedDelaunaybegin();
 	afx_msg void OnBnClickedRedraw();
     afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+
 };

@@ -11,7 +11,7 @@
 
 #include "OpenGLDemoDoc.h"
 #include "OpenGLDemoView.h"
-#include <math.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -22,6 +22,50 @@
 
 #include "GL/GLU.H" // 已经包含GL/GL.h
 #include <gl/glut.h>
+
+#include "DataStructureDelaunay.h"
+#include "Utils.cpp"
+#include "TriangulationDelaunay.cpp"
+
+#pragma region Algorithem Delaunay Global var  Begin
+
+bool bcandraw=true;//能否绘图
+CObList *mpNodeList,*mpTriList,*mpEdgeList;
+//节点链，三角形链，候选节点链，新的候选节点链,边链
+//CObList *mpAllNode,*mpAllEdge;//界面上所有的点和边
+int currentnode;//总结点数
+int waihuan;//外环节点数
+int neihuan;//内环节点数
+int end_in;//外环节点数，内环节点数，目前已完成处理的内环节点数
+int curhuan;//当前环数
+bool wai;//是否外环
+int currentedge=0;//总边数
+int tri_index=0;//三角形索引
+bool in_start;//内环开始输入的状态
+int N;//当前多边形边数
+int k;//当前处理边数
+
+CNode *pL11,*pL12,*pLk1,*pLk2,*pLo1,*pLo2,*pLm1,*pLm2,*pLn1,*pLn2;//各边的始终点
+CEdge *pLk,*pL1,*pLo,*pLm,*pLn;//各边
+
+bool hasGetResult = false;
+
+
+void findedge(int k,CEdge*& pLk)
+{
+    POSITION pos;
+    pos=mpEdgeList->FindIndex(k-1);
+    pLk=(CEdge*)mpEdgeList->GetAt(pos);
+}
+void findnode(CEdge* pedge, CNode*& pbeginnode, CNode*& pendnode)
+{
+    POSITION pos;
+    pos=mpNodeList->FindIndex(pedge->L1-1);
+    pbeginnode=(CNode*)mpNodeList->GetAt(pos);
+    pos=mpNodeList->FindIndex(pedge->L2-1);
+    pendnode=(CNode*)mpNodeList->GetAt(pos);
+}
+#pragma endregion Algorithem Delaunay Global var  end
 
 
 using namespace std;
@@ -46,6 +90,12 @@ BEGIN_MESSAGE_MAP(COpenGLDemoView, CView)
 	ON_WM_MOUSEMOVE()
 	ON_WM_ERASEBKGND()
 	ON_WM_LBUTTONDBLCLK()
+    ON_BN_CLICKED(IDC_OuterEnd,OnBtnClickOuterEnd)
+    ON_BN_CLICKED(IDC_InnerEnd,OnBtnClickInnerEnd)
+    ON_BN_CLICKED(IDC_PolygonOK,OnBtnClickPolygonOK)
+    ON_BN_CLICKED(IDC_Begin,OnBtnClickBegin)
+    ON_BN_CLICKED(IDC_Redraw,OnBtnClickRedraw)
+
 END_MESSAGE_MAP()
 
 void initLights();
@@ -105,7 +155,7 @@ void initLights()
     // Setting lights and materials ends
     // ****************************************************
 }
-void grawString(int x, int y, char* str)
+void drawString(int x, int y, char* str)
 {
     glColor3d(0.0, 0.0, 0.0);
     int n = strlen(str);  
@@ -115,8 +165,29 @@ void grawString(int x, int y, char* str)
     for (int i = 0; i < n; i++)  
         glutBitmapCharacter(GLUT_BITMAP_8_BY_13, *(str+i)); 
 }
+void drawString(int x, int y, CString cstr)
+{
+    char * str = (LPSTR)(LPCTSTR)cstr;
+    glColor3d(0.0, 0.0, 0.0);
+    int n = strlen(str);  
+    //设置要在屏幕上显示字符的起始位置 
+    glRasterPos2i(x,y);  
+    //逐个显示字符串中的每个字符  
+    for (int i = 0; i < n; i++)  
+        glutBitmapCharacter(GLUT_BITMAP_8_BY_13, *(str+i)); 
+}
+int clientClientRectHeight;
+void drawMFCPoint(int x , int y)
+{
+    int yy = clientClientRectHeight - y;
+    glVertex2d(x, yy);
+}
 void COpenGLDemoView::OnDraw(CDC* pDC)
 {
+    CRect rect;
+    GetClientRect(&rect);
+    clientClientRectHeight =  rect.Height();
+
 	COpenGLDemoDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	if (!pDoc)
@@ -127,9 +198,66 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glLoadIdentity();
-    grawString(0,0,"tanglei");
+    drawString(0,0,"tanglei");
+#pragma region draw
+
+
+    POSITION pos;
+    CNode node, node0;
+    CString str;
+    int i=0;
+
+    glBegin(GL_LINE_LOOP);
+    int t_index = 0;
+    for (pos=mpNodeList->GetHeadPosition();pos!=NULL;)
+    {
+        node=*(CNode*)mpNodeList->GetNext(pos);
+        if (node.NO_in != t_index)
+        {
+            glEnd();
+            glBegin(GL_LINE_LOOP);
+            t_index = node.NO_in;
+        }
+        drawMFCPoint(node.x, node.y);
+    }
+    glEnd();
     
-	SwapBuffers(pDC->m_hDC);
+    CString cst;
+    for (pos=mpNodeList->GetHeadPosition();pos!=NULL;)
+    {
+        node=*(CNode*)mpNodeList->GetNext(pos);
+        cst.Format("%d",node.index);
+        drawString(node.x, clientClientRectHeight - node.y + 5, cst);
+    }
+    
+
+    if (hasGetResult) 
+    {
+        POSITION pos;
+        CTriange * tri; 
+        glBegin(GL_TRIANGLES);
+        srand((unsigned int)time(NULL));
+        for (pos=mpTriList->GetHeadPosition();pos!=NULL;)
+        {
+            
+            double a = rand()%100 / 100.0;
+            double b = rand()%100 / 100.0;
+            double c = rand()%100 / 100.0;
+            glColor3d(a, b, c);
+            tri = (CTriange * ) mpTriList->GetNext(pos);
+
+            node0=*(CNode*)mpNodeList->GetAt(mpNodeList->FindIndex(tri->L1-1));
+            drawMFCPoint(node0.x, node0.y);
+            node0=*(CNode*)mpNodeList->GetAt(mpNodeList->FindIndex(tri->L2-1));
+            drawMFCPoint(node0.x, node0.y);
+            node0=*(CNode*)mpNodeList->GetAt(mpNodeList->FindIndex(tri->L3-1));
+            drawMFCPoint(node0.x, node0.y);
+        }
+        glEnd();
+    }
+#pragma endregion draw
+	
+    SwapBuffers(pDC->m_hDC);
 	wglMakeCurrent(NULL, NULL);
 
 }
@@ -247,7 +375,51 @@ int COpenGLDemoView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// that this function returns
 	m_hRC = wglCreateContext(dc.m_hDC);
 
-	//MessageBox(L"鼠标左键选择控制点位置\r\n右键生成画bezier曲线\r\n双击左键清空控制点");
+	//MessageBox("鼠标左键选择控制点位置\r\n右键生成画bezier曲线\r\n双击左键清空控制点");
+
+    int button_width=85;
+    int button_height=25;
+    CSize buttonSize(button_width, button_height);
+    int initialButtonX = 50;
+    int initialButtonY = 5;
+    int jianxi = 10;//间隙
+    //CRect( POINT point, SIZE size );
+
+    CRect rect_button_OuterEnd(CPoint(initialButtonX, initialButtonY), buttonSize);   //控制按钮大小、位置
+    CRect rect_button_InnerEnd(CPoint(initialButtonX + button_width*1+jianxi, initialButtonY), buttonSize); 
+    CRect rect_button_PolygonOK(CPoint(initialButtonX + button_width*2+jianxi, initialButtonY), buttonSize); 
+    CRect rect_button_Begin(CPoint(initialButtonX + button_width*3+jianxi, initialButtonY), buttonSize); 
+    CRect rect_button_Redraw(CPoint(initialButtonX + button_width*4+jianxi, initialButtonY), buttonSize); 
+
+    
+    m_button_OuterEnd.Create("OuterEnd",WS_CHILD|WS_VISIBLE|WS_BORDER,rect_button_OuterEnd,this,IDC_OuterEnd);
+    m_button_OuterEnd.ShowWindow(SW_SHOWNORMAL);
+    
+    m_button_InnerEnd.Create("InnerEnd",WS_CHILD|WS_VISIBLE|WS_BORDER,rect_button_InnerEnd,this,IDC_InnerEnd);
+    m_button_InnerEnd.ShowWindow(SW_SHOWNORMAL);
+    
+    m_button_PolygonOK.Create("PolygonOK",WS_CHILD|WS_VISIBLE|WS_BORDER,rect_button_PolygonOK,this,IDC_PolygonOK);
+    m_button_PolygonOK.ShowWindow(SW_SHOWNORMAL);
+
+    m_button_Begin.Create("Begin",WS_CHILD|WS_VISIBLE|WS_BORDER,rect_button_Begin,this,IDC_Begin);
+    m_button_Begin.ShowWindow(SW_SHOWNORMAL);
+
+    m_button_Redraw.Create("Redraw",WS_CHILD|WS_VISIBLE|WS_BORDER,rect_button_Redraw,this,IDC_Redraw);
+    m_button_Redraw.ShowWindow(SW_SHOWNORMAL);
+
+
+    k=0;
+    currentnode=0;
+    waihuan=neihuan=0;
+    curhuan=0;
+    currentedge=0;
+    end_in=0;
+    wai=true;
+    mpNodeList=new CObList(sizeof(CNode));
+   
+    mpTriList=new CObList(sizeof(CTriange));
+    mpEdgeList=new CObList(sizeof(CEdge));
+
 	return 0;
 }
 
@@ -313,27 +485,267 @@ void COpenGLDemoView::OnMouseMove(UINT nFlags, CPoint point)
 
 void COpenGLDemoView::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	/*	
-	{
+	//cordinate mfc --> opengl	
+	/*
+    {
 		CRect rect;
 		GetClientRect(&rect);
 		int x = point.x;
 		int y = rect.Height() - point.y;
-
-		CP_Vector2D p = CP_Vector2D(x, y);
+        point = CPoint(x, y);
 	}
-	Invalidate(TRUE);
 	*/
-	CView::OnLButtonUp(nFlags, point);
-}
+
+    if (TRUE==bcandraw)
+    {
+        CNode temp,beginnode,endnode,temp2;
+        CEdge edge;
+        CString str;
+
+        POSITION pos;
+
+        if (0!=mpEdgeList->GetCount())
+        {
+            if (true==wai || 0!=end_in)
+            {
+                temp=*(CNode*)mpNodeList->GetTail();
+                temp2.x=point.x;
+                temp2.y=point.y;
+                CNode *a,*b;
+                for (pos=mpEdgeList->GetHeadPosition();pos!=NULL;)
+                {
+                    edge=*(CEdge*)mpEdgeList->GetNext(pos);
+                    findnode(&edge,a,b);
+                    if (Utils::intersect(&temp,&temp2,a,b))
+                    {
+                        MessageBox("边不能相交");
+                        return;
+                    }
+                }
+            }
+
+        }
+ 
+
+        currentnode++;
+
+        if (true==wai)
+        {
+            waihuan++;
+            temp.index=waihuan;
+            temp.x=point.x;
+            temp.y=point.y;
+            temp.out=TRUE;
+            
+            if (1==waihuan)
+            {
+                temp.head=TRUE;
+            }
+
+            if (!mpNodeList->IsEmpty())
+            {
+                endnode=*(CNode*)mpNodeList->GetTail();
+                ++currentedge;
+                edge.index=currentedge;
+                edge.L1=endnode.index;
+                edge.L2=temp.index;
+                mpEdgeList->AddTail(new CEdge(edge));
+
+            }
+        }
+        else
+        {
+            neihuan++;
+            temp.index=waihuan+neihuan;
+            temp.x=point.x;
+            temp.y=point.y;
+            temp.out=FALSE;
+            temp.NO_in=curhuan;
+            if (TRUE==in_start)
+            {
+                temp.head=true;
+                in_start=false;
+            }
+
+            if(end_in!=0)
+            {
+                pos=mpNodeList->GetTailPosition();
+                endnode=*(CNode*)mpNodeList->GetAt(pos);
+
+                ++currentedge;
+                edge.index=currentedge;
+                edge.L1=endnode.index;
+                edge.L2=temp.index;
+                mpEdgeList->AddTail(new CEdge(edge));
+
+            }
+            ++end_in; 
+        }	
+  
+        mpNodeList->AddTail(new CNode(temp));
+        Invalidate();
+        CView::OnLButtonUp(nFlags, point);
+    }
+ }
 
 void COpenGLDemoView::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
 	/*
-	MessageBox(L"清空控制点，重画");
+	MessageBox("清空控制点，重画");
 	ctrlPoints.clear();
 	isReady = false;
 	Invalidate(FALSE);
 	*/
 	CView::OnLButtonDblClk(nFlags,point);
+}
+void COpenGLDemoView::OnBtnClickOuterEnd()
+{
+    if (waihuan<3)
+    {
+        MessageBox("请至少输入3个点!");
+        return;
+    }
+    CNode headnode,beginnode,endnode,temp,temp2;
+    POSITION pos;
+
+    CEdge edge;
+
+    if (0!=mpEdgeList->GetCount())
+    {
+        temp=*(CNode*)mpNodeList->GetTail();
+        temp2=*(CNode*)mpNodeList->GetHead();
+        CNode *a,*b;
+        for (pos=mpEdgeList->GetHeadPosition();pos!=NULL;)
+        {
+            edge=*(CEdge*)mpEdgeList->GetNext(pos);
+            findnode(&edge,a,b);
+            if (Utils::intersect(&temp,&temp2,a,b))
+            {
+                MessageBox("输入的边不能构成多边形，请重绘！");
+                GetDlgItem(IDC_PolygonOK)->EnableWindow(FALSE);
+                return;
+            }
+        }
+    }
+
+    pos=mpNodeList->GetHeadPosition();
+    headnode=beginnode=*(CNode*)mpNodeList->GetHead();
+    while (pos!=NULL)
+    {
+        endnode=*(CNode*)mpNodeList->GetNext(pos);
+        beginnode=endnode;
+    }
+    beginnode.tail=true;
+  
+    ++currentedge;
+    edge.index=currentedge;
+    edge.L1=beginnode.index;
+    edge.L2=headnode.index;
+    mpEdgeList->AddTail(new CEdge(edge));
+
+
+    wai=FALSE;
+    curhuan++;
+    GetDlgItem(IDC_OuterEnd)->EnableWindow(FALSE);
+    GetDlgItem(IDC_InnerEnd)->EnableWindow(TRUE);
+    GetDlgItem(IDC_PolygonOK)->EnableWindow(TRUE);
+    
+}
+void COpenGLDemoView::OnBtnClickRedraw()
+{
+
+    GetDlgItem(IDC_OuterEnd)->EnableWindow(TRUE);
+    GetDlgItem(IDC_InnerEnd)->EnableWindow(FALSE);
+    GetDlgItem(IDC_PolygonOK)->EnableWindow(FALSE);
+    GetDlgItem(IDC_Begin)->EnableWindow(FALSE);
+
+    bcandraw=true;
+    k=0;
+    currentnode=0;
+    waihuan=neihuan=0;
+    curhuan=0;
+    currentedge=0;
+    end_in=0;
+    wai=true;
+    in_start=false;
+    mpNodeList->RemoveAll();
+
+    mpTriList->RemoveAll();
+    mpEdgeList->RemoveAll();
+    this->Invalidate();
+}
+void COpenGLDemoView::OnBtnClickBegin()
+{
+    TriangulationDelaunay tri = TriangulationDelaunay(mpNodeList,  mpEdgeList, currentedge);
+
+    mpTriList = tri.triangulate();
+
+    hasGetResult = true;
+
+
+#ifdef _DEBUG
+    POSITION pos;
+    for (pos=mpTriList->GetHeadPosition();pos!=NULL;)
+    {
+        afxDump<<"三角剖分结果:"<<mpTriList->GetNext(pos)<<"\n";
+    }
+#endif
+    Invalidate();
+    GetDlgItem(IDC_InnerEnd)->EnableWindow(FALSE);
+    GetDlgItem(IDC_Begin)->EnableWindow(FALSE);
+}
+void COpenGLDemoView::OnBtnClickPolygonOK()
+{
+    bcandraw=false;
+    GetDlgItem(IDC_PolygonOK)->EnableWindow(FALSE);
+    GetDlgItem(IDC_OuterEnd)->EnableWindow(FALSE);
+    GetDlgItem(IDC_InnerEnd)->EnableWindow(FALSE);
+    GetDlgItem(IDC_Begin)->EnableWindow(TRUE);
+}
+void COpenGLDemoView::OnBtnClickInnerEnd()
+{
+    if (end_in >= 0 && end_in < 3)
+    {
+        MessageBox("请至少输入3个点!");
+        return;
+    }
+    CNode headnode,beginnode,endnode;
+    CEdge edge;
+    POSITION pos;
+  
+    pos=mpNodeList->FindIndex( waihuan+neihuan-end_in);
+    headnode=*(CNode*)mpNodeList->GetAt(pos);
+    endnode=*(CNode*)mpNodeList->GetTail();
+    if (0!=mpEdgeList->GetCount())
+    {
+        CNode *a,*b;
+        for (pos=mpEdgeList->GetHeadPosition();pos!=NULL;)
+        {
+            edge=*(CEdge*)mpEdgeList->GetNext(pos);
+            findnode(&edge,a,b);
+            if (Utils::intersect(&endnode,&headnode,a,b))
+            {
+                MessageBox("输入的边不能构成多边形，请重绘！");
+                GetDlgItem(IDC_PolygonOK)->EnableWindow(FALSE);
+                return;
+            }
+        }
+    }
+
+   
+    beginnode.tail=true;
+
+    ++currentedge;
+    edge.index=currentedge;
+    edge.L1=endnode.index;
+    edge.L2=headnode.index;
+    mpEdgeList->AddTail(new CEdge(edge));
+
+
+    end_in=0;
+    ++curhuan;
+    in_start=TRUE;
+
+    GetDlgItem(IDC_PolygonOK)->EnableWindow(TRUE);
+    GetDlgItem(IDC_InnerEnd)->EnableWindow(TRUE);
 }

@@ -26,6 +26,6 @@ Computer Aided Geometric Modeling
 
 * task6: B-Rep,绘制裁剪圆柱体
 
-* triangulation : 实现 O(nLogN) 单调多边形 三角剖分
+* triangulation : (基于CView，OPENGL 画) O(N^2)任意多边形的Delaunay三角剖分-计算机学报，另外准备加单调多边形画
 
-* delaunayPolygon2 : 实现，O(N^2)任意多边形的Delaunay三角剖分-计算机学报
+* delaunayPolygon2 : 实现，(基于dialog，DC client 画)O(N^2)任意多边形的Delaunay三角剖分-计算机学报

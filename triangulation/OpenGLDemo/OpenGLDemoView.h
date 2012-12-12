@@ -45,6 +45,13 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	// OpenGL渲染句柄(a handle to an OpenGL rendering context)
 	HGLRC m_hRC;
+
+    CButton m_button_OuterEnd;
+    CButton m_button_InnerEnd;
+    CButton m_button_PolygonOK;
+    CButton m_button_Begin;
+    CButton m_button_Redraw;
+
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnDestroy();
@@ -53,6 +60,14 @@ public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
+
+    afx_msg void OnBtnClickOuterEnd();
+    afx_msg void OnBtnClickRedraw();
+    afx_msg void OnBtnClickBegin();
+    afx_msg void OnBtnClickPolygonOK();
+    afx_msg void OnBtnClickInnerEnd();
+
+
 };
 
 #ifndef _DEBUG  // OpenGLDemoView.cpp 中的调试版本
