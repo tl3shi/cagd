@@ -49,7 +49,7 @@ CNode *pL11,*pL12,*pLk1,*pLk2,*pLo1,*pLo2,*pLm1,*pLm2,*pLn1,*pLn2;//各边的始终点
 CEdge *pLk,*pL1,*pLo,*pLm,*pLn;//各边
 
 bool hasGetResult = false;
-
+bool filledTriangles = true;
 
 void findedge(int k,CEdge*& pLk)
 {
@@ -95,6 +95,8 @@ BEGIN_MESSAGE_MAP(COpenGLDemoView, CView)
     ON_BN_CLICKED(IDC_PolygonOK,OnBtnClickPolygonOK)
     ON_BN_CLICKED(IDC_Begin,OnBtnClickBegin)
     ON_BN_CLICKED(IDC_Redraw,OnBtnClickRedraw)
+
+    ON_COMMAND(ID_TrianglesFilled, &COpenGLDemoView::OnTrianglesfilled)
 
 END_MESSAGE_MAP()
 
@@ -235,6 +237,13 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
     {
         POSITION pos;
         CTriange * tri; 
+        if(! filledTriangles)
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); 
+        }else
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
         glBegin(GL_TRIANGLES);
         srand((unsigned int)time(NULL));
         for (pos=mpTriList->GetHeadPosition();pos!=NULL;)
@@ -245,13 +254,14 @@ void COpenGLDemoView::OnDraw(CDC* pDC)
             double c = rand()%100 / 100.0;
             glColor3d(a, b, c);
             tri = (CTriange * ) mpTriList->GetNext(pos);
-
+         
             node0=*(CNode*)mpNodeList->GetAt(mpNodeList->FindIndex(tri->L1-1));
             drawMFCPoint(node0.x, node0.y);
             node0=*(CNode*)mpNodeList->GetAt(mpNodeList->FindIndex(tri->L2-1));
             drawMFCPoint(node0.x, node0.y);
             node0=*(CNode*)mpNodeList->GetAt(mpNodeList->FindIndex(tri->L3-1));
             drawMFCPoint(node0.x, node0.y);
+
         }
         glEnd();
     }
@@ -406,6 +416,11 @@ int COpenGLDemoView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
     m_button_Redraw.Create("Redraw",WS_CHILD|WS_VISIBLE|WS_BORDER,rect_button_Redraw,this,IDC_Redraw);
     m_button_Redraw.ShowWindow(SW_SHOWNORMAL);
+
+    GetDlgItem(IDC_OuterEnd)->EnableWindow(TRUE);
+    GetDlgItem(IDC_InnerEnd)->EnableWindow(FALSE);
+    GetDlgItem(IDC_PolygonOK)->EnableWindow(FALSE);
+    GetDlgItem(IDC_Begin)->EnableWindow(FALSE);
 
 
     k=0;
@@ -748,4 +763,11 @@ void COpenGLDemoView::OnBtnClickInnerEnd()
 
     GetDlgItem(IDC_PolygonOK)->EnableWindow(TRUE);
     GetDlgItem(IDC_InnerEnd)->EnableWindow(TRUE);
+}
+
+
+void COpenGLDemoView::OnTrianglesfilled()
+{
+    filledTriangles = filledTriangles == false ? true : false;
+    this->Invalidate();
 }
