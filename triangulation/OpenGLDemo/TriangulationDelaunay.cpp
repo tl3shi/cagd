@@ -225,17 +225,20 @@ public:
         findedge(1,pL1);
         findnode(pL1,pL11,pL12);
         findLo2(pL11,pL12,pLo2,mpCandidateNode);
+
+        /*//用VC语言实现任意多边形的Delaunay完全三角剖分算法,//no need 
         CNode *pLcan;
         while (true==IsCanExistInCircle(pL11,pL12,pLo2))					 
         {
             mpCandidateNode->RemoveAll();
             for(pos=mpCandidateNode2->GetHeadPosition();pos!=NULL;)
             {
-                pLcan=(CNode*)mpCandidateNode->GetNext(pos);
+                //mpCandidateNode2 store 能够行成三角形的候选列表
+                pLcan=(CNode*)mpCandidateNode2->GetNext(pos);
                 mpCandidateNode->AddTail(new CNode(*pLcan));
             }
             findLo2(pL11,pL12,pLo2,mpCandidateNode);
-        }
+        }*/
   
         tri.index=++tri_index;
         tri.L1=pL11->index;
