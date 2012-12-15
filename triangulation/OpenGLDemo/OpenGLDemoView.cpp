@@ -98,6 +98,7 @@ BEGIN_MESSAGE_MAP(COpenGLDemoView, CView)
 
     ON_COMMAND(ID_TrianglesFilled, &COpenGLDemoView::OnTrianglesfilled)
 
+    ON_COMMAND(ID_HowToUse, &COpenGLDemoView::OnHowtouse)
 END_MESSAGE_MAP()
 
 void initLights();
@@ -334,9 +335,6 @@ COpenGLDemoDoc* COpenGLDemoView::GetDocument() const // 非调试版本是内联的
 #endif //_DEBUG
 
 
-// COpenGLDemoView 消息处理程序
-
-
 int COpenGLDemoView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CView::OnCreate(lpCreateStruct) == -1)
@@ -386,7 +384,7 @@ int COpenGLDemoView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_hRC = wglCreateContext(dc.m_hDC);
 
 	//MessageBox("鼠标左键选择控制点位置\r\n右键生成画bezier曲线\r\n双击左键清空控制点");
-
+    
     int button_width=85;
     int button_height=25;
     CSize buttonSize(button_width, button_height);
@@ -435,6 +433,7 @@ int COpenGLDemoView::OnCreate(LPCREATESTRUCT lpCreateStruct)
     mpTriList=new CObList(sizeof(CTriange));
     mpEdgeList=new CObList(sizeof(CEdge));
 
+    this->OnHowtouse();
 	return 0;
 }
 
@@ -770,4 +769,20 @@ void COpenGLDemoView::OnTrianglesfilled()
 {
     filledTriangles = filledTriangles == false ? true : false;
     this->Invalidate();
+}
+
+
+void COpenGLDemoView::OnHowtouse()
+{
+
+    MessageBox("                             How To Use?  \n \
+               1、逆时针左键输入外环点，点击按钮(OuterEnd)输入完成;\n \
+               2、顺时针左键输入内环点，点击按钮(InnerEnd)输入完成;\n \
+               3、可以重复步骤2，0次(只有外环)或者多次(多个内环);\n \
+               4、点击按钮(PolygonOK)完成多边形的输入; \n \
+               5、点击按钮(Begin)开始Delaunay三角剖分; \n \
+               6、Redraw重新绘制新的多边形; \n \
+               *\"功能\"菜单下可以选择是否填充剖分后的三角形;\n \
+               *\"帮助\"菜单下可以再次出现此帮助; \
+               ");
 }
