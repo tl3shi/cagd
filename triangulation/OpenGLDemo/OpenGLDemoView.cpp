@@ -99,6 +99,9 @@ BEGIN_MESSAGE_MAP(COpenGLDemoView, CView)
     ON_COMMAND(ID_TrianglesFilled, &COpenGLDemoView::OnTrianglesfilled)
 
     ON_COMMAND(ID_HowToUse, &COpenGLDemoView::OnHowtouse)
+	ON_COMMAND(ID_FILE_SAVE_AS, &COpenGLDemoView::OnFileSaveAs)
+	ON_COMMAND(ID_FILE_SAVE, &COpenGLDemoView::OnFileSave)
+	ON_COMMAND(ID_FILE_OPEN, &COpenGLDemoView::OnFileOpen)
 END_MESSAGE_MAP()
 
 void initLights();
@@ -385,6 +388,7 @@ int COpenGLDemoView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	//MessageBox("鼠标左键选择控制点位置\r\n右键生成画bezier曲线\r\n双击左键清空控制点");
     
+
     int button_width=85;
     int button_height=25;
     CSize buttonSize(button_width, button_height);
@@ -433,7 +437,7 @@ int COpenGLDemoView::OnCreate(LPCREATESTRUCT lpCreateStruct)
     mpTriList=new CObList(sizeof(CTriange));
     mpEdgeList=new CObList(sizeof(CEdge));
 
-    this->OnHowtouse();
+    //this->OnHowtouse();
 	return 0;
 }
 
@@ -785,4 +789,259 @@ void COpenGLDemoView::OnHowtouse()
                *\"功能\"菜单下可以选择是否填充剖分后的三角形;\n \
                *\"帮助\"菜单下可以再次出现此帮助; \
                ");
+}
+
+
+void COpenGLDemoView::OnFileSaveAs()
+{
+	const char * filename ="testfile.txt";
+	FILE *fp = fopen(filename, "wt+");
+	POSITION pos;
+	CNode node;
+	CString cstr;
+	if ( fp != NULL )
+	{
+		for (pos=mpNodeList->GetHeadPosition();pos!=NULL;)
+		{
+			node=*(CNode*)mpNodeList->GetNext(pos);
+			//	int index;//点索引号
+			//int x,y;//x，y坐标值
+			//bool out;//内外环
+			//int NO_in;//内环编号，外环为0，内环从1开始
+			//bool head;//是否环头
+			//bool tail;//是否环尾
+			//cstr.Format("%d,%d,%d,%d,%d,%d,%d\n",node.index, node.x, node.y, node.out, node.NO_in, node.head, node.tail);
+			cstr.Format("%d,%d,%d,%d\n",node.index, node.x, node.y, node.NO_in);
+			fputs(cstr, fp);
+		}
+		cstr.Format("%d,%d,%d,%d\n",-1, -1, -1, -1);
+		fputs(cstr, fp);
+	}
+	fclose(fp);
+
+	CString tip;
+	tip.Format("%s保存成功", filename);
+	MessageBox(tip);
+}
+
+
+void COpenGLDemoView::OnFileSave()
+{
+	COpenGLDemoView::OnFileSaveAs();
+}
+
+
+void COpenGLDemoView::OnFileOpen()
+{
+	const char * filename ="testfile.txt";
+
+	POSITION pos;
+	CNode node;
+	CString cstr;
+	ifstream fin(filename); 
+	string s;  
+	mpNodeList->RemoveAll();
+	mpTriList->RemoveAll();
+	mpEdgeList->RemoveAll();
+
+	bcandraw=true;
+	k=0;
+	currentnode=0;
+	waihuan=neihuan=0;
+	curhuan=0;
+	currentedge=0;
+	end_in=0;
+	wai=true;
+	in_start=false;
+
+	CNode temp,beginnode,endnode,temp2;
+	CEdge edge;
+	CString str;
+	int lastNo_in = -1;
+	while(getline(fin,s))
+	{    
+		vector<std::string> node = Utils::split(s,',');
+		//cstr.Format("%d,%d,%d,%d,%d,%d,%d\n",node.index, node.x, node.y, node.NO_in);
+		int index = atof(node[0].c_str());
+		int x = atof(node[1].c_str());
+		int y = atof(node[2].c_str());
+		//bool out = (atof(node[3].c_str()) == 0 ? false : true);
+		int no_in = atof(node[3].c_str());
+		//bool head = (atof(node[3].c_str()) == 0 ? false : true);
+		//bool tail = (atof(node[3].c_str()) == 0 ? false : true);
+		//ensure InnerEnd can be execute
+		if (index == -1 && x == -1 && y == -1 && no_in == -1)
+		{
+			lastNo_in == 6535;
+		}
+		if (lastNo_in != no_in)
+		{
+			lastNo_in = no_in;
+		
+			if(curhuan == 0) // outerEnd
+			{
+				bool flagxx = false;
+				if (waihuan<3)
+				{
+					flagxx = true;
+				}
+				if (!flagxx)
+				{
+
+					CNode headnode,beginnode,endnode,temp,temp2;
+					POSITION pos;
+
+					CEdge edge;
+
+					if (0!=mpEdgeList->GetCount())
+					{
+						temp=*(CNode*)mpNodeList->GetTail();
+						temp2=*(CNode*)mpNodeList->GetHead();
+						CNode *a,*b;
+						for (pos=mpEdgeList->GetHeadPosition();pos!=NULL;)
+						{
+							edge=*(CEdge*)mpEdgeList->GetNext(pos);
+							findnode(&edge,a,b);
+							if (Utils::intersect(&temp,&temp2,a,b))
+							{
+								MessageBox("输入的边不能构成多边形，请重绘！");
+								GetDlgItem(IDC_PolygonOK)->EnableWindow(FALSE);
+								return;
+							}
+						}
+					}
+
+					pos=mpNodeList->GetHeadPosition();
+					headnode=beginnode=*(CNode*)mpNodeList->GetHead();
+					while (pos!=NULL)
+					{
+						endnode=*(CNode*)mpNodeList->GetNext(pos);
+						beginnode=endnode;
+					}
+					beginnode.tail=true;
+
+					++currentedge;
+					edge.index=currentedge;
+					edge.L1=beginnode.index;
+					edge.L2=headnode.index;
+					mpEdgeList->AddTail(new CEdge(edge));
+
+
+					wai=FALSE;
+					curhuan++;
+					GetDlgItem(IDC_OuterEnd)->EnableWindow(FALSE);
+					GetDlgItem(IDC_InnerEnd)->EnableWindow(TRUE);
+					GetDlgItem(IDC_PolygonOK)->EnableWindow(TRUE);
+				}
+			}else//InnerEnd
+			{
+				bool flagxx = false;
+				if (end_in >= 0 && end_in < 3)
+				{
+					flagxx = true;
+				}
+				if (!flagxx)
+				{
+					CNode headnode,beginnode,endnode;
+					CEdge edge;
+					POSITION pos;
+
+					pos=mpNodeList->FindIndex( waihuan+neihuan-end_in);
+					headnode=*(CNode*)mpNodeList->GetAt(pos);
+					endnode=*(CNode*)mpNodeList->GetTail();
+					if (0!=mpEdgeList->GetCount())
+					{
+						CNode *a,*b;
+						for (pos=mpEdgeList->GetHeadPosition();pos!=NULL;)
+						{
+							edge=*(CEdge*)mpEdgeList->GetNext(pos);
+							findnode(&edge,a,b);
+							if (Utils::intersect(&endnode,&headnode,a,b))
+							{
+								MessageBox("输入的边不能构成多边形，请重绘！");
+								GetDlgItem(IDC_PolygonOK)->EnableWindow(FALSE);
+								return;
+							}
+						}
+					}
+
+					beginnode.tail=true;
+
+					++currentedge;
+					edge.index=currentedge;
+					edge.L1=endnode.index;
+					edge.L2=headnode.index;
+					mpEdgeList->AddTail(new CEdge(edge));
+
+					end_in=0;
+					++curhuan;
+					in_start=TRUE;
+
+					GetDlgItem(IDC_PolygonOK)->EnableWindow(TRUE);
+					GetDlgItem(IDC_InnerEnd)->EnableWindow(TRUE);
+
+				}
+			}
+		}
+	
+		if (true==wai)
+		{
+			waihuan++;
+			temp.index=waihuan;
+			temp.x=x;
+			temp.y=y;
+			temp.out=TRUE;
+
+			if (1==waihuan)
+			{
+				temp.head=TRUE;
+			}
+
+			if (!mpNodeList->IsEmpty())
+			{
+				endnode=*(CNode*)mpNodeList->GetTail();
+				++currentedge;
+				edge.index=currentedge;
+				edge.L1=endnode.index;
+				edge.L2=temp.index;
+				mpEdgeList->AddTail(new CEdge(edge));
+			}
+		}
+		else
+		{
+			neihuan++;
+			temp.index=waihuan+neihuan;
+			temp.x=x;
+			temp.y=y;
+			temp.out=FALSE;
+			temp.NO_in=curhuan;
+			if (TRUE==in_start)
+			{
+				temp.head=true;
+				in_start=false;
+			}
+
+			if(end_in!=0)
+			{
+				pos=mpNodeList->GetTailPosition();
+				endnode=*(CNode*)mpNodeList->GetAt(pos);
+
+				++currentedge;
+				edge.index=currentedge;
+				edge.L1=endnode.index;
+				edge.L2=temp.index;
+				mpEdgeList->AddTail(new CEdge(edge));
+			}
+			++end_in; 
+		}	
+		mpNodeList->AddTail(new CNode(temp));
+	}
+	bcandraw=false;
+	GetDlgItem(IDC_PolygonOK)->EnableWindow(FALSE);
+	GetDlgItem(IDC_OuterEnd)->EnableWindow(FALSE);
+	GetDlgItem(IDC_InnerEnd)->EnableWindow(FALSE);
+	GetDlgItem(IDC_Begin)->EnableWindow(TRUE);
+
+	this->Invalidate();
+	fin.close();
 }

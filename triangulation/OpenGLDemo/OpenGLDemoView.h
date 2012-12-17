@@ -70,6 +70,9 @@ public:
 
     afx_msg void OnTrianglesfilled();
     afx_msg void OnHowtouse();
+	afx_msg void OnFileSaveAs();
+	afx_msg void OnFileSave();
+	afx_msg void OnFileOpen();
 };
 
 #ifndef _DEBUG  // OpenGLDemoView.cpp 中的调试版本

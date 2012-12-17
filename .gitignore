@@ -1,11 +1,14 @@
 Debug/*
 */Debug/*
+*/ipch/*
 */*/Debug/*
 *.suo
 *.exe
 *.swp
 # Binary version of the current resource script file;used for quick loading.
 *.aps
+*.sdf
+*.opensdf
 
 *.bak
 

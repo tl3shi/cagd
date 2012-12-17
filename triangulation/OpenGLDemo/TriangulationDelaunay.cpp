@@ -226,7 +226,7 @@ public:
         findnode(pL1,pL11,pL12);
         findLo2(pL11,pL12,pLo2,mpCandidateNode);
 
-        /*//用VC语言实现任意多边形的Delaunay完全三角剖分算法,//no need 
+        //用VC语言实现任意多边形的Delaunay完全三角剖分算法
         CNode *pLcan;
         while (true==IsCanExistInCircle(pL11,pL12,pLo2))					 
         {
@@ -238,7 +238,7 @@ public:
                 mpCandidateNode->AddTail(new CNode(*pLcan));
             }
             findLo2(pL11,pL12,pLo2,mpCandidateNode);
-        }*/
+        }
   
         tri.index=++tri_index;
         tri.L1=pL11->index;

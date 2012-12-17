@@ -10,7 +10,7 @@
 #endif
 
 #include "OpenGLDemoDoc.h"
-
+#include "OpenGLDemoView.h"
 #include <propkey.h>
 
 #ifdef _DEBUG
@@ -57,7 +57,17 @@ void COpenGLDemoDoc::Serialize(CArchive& ar)
 {
 	if (ar.IsStoring())
 	{
-		// TODO: 在此添加存储代码
+		//POSITION pos = this->GetDocTemplate()->GetFirstDocPosition();
+		//if (pos != null)
+		//{
+		//	CDocument *pDocument = this->GetDocTemplate()->GetNextDoc(pos);
+		//	POSITION p2 = pDocument->GetFirstViewPosition(); // 得到文档对应的第1个视图
+		//	while (p2 != NULL) // 遍历文档对应的视图
+		//	{
+		//		COpenGLDemoView *pView = (COpenGLDemoView *)pDocument->GetNextView(p2);
+		//	}
+		//}
+		//MessageBox("Save");
 	}
 	else
 	{
