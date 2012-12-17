@@ -235,7 +235,7 @@ public:
             mpCandidateNode->RemoveAll();
             for(pos=mpCandidateNode2->GetHeadPosition();pos!=NULL;)
             {
-                //mpCandidateNode2 store 能够行成三角形的候选列表
+                //mpCandidateNode2 store 原始三角形中包含有的其他候选节点
                 pLcan=(CNode*)mpCandidateNode2->GetNext(pos);
                 mpCandidateNode->AddTail(new CNode(*pLcan));
             }
