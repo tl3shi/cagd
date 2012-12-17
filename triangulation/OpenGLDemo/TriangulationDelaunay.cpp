@@ -225,8 +225,10 @@ public:
         findedge(1,pL1);
         findnode(pL1,pL11,pL12);
         findLo2(pL11,pL12,pLo2,mpCandidateNode);
+		
 
         //用VC语言实现任意多边形的Delaunay完全三角剖分算法
+		//不仅要选外接圆最小滴，而且还要选择不包含其他候选节点的
         CNode *pLcan;
         while (true==IsCanExistInCircle(pL11,pL12,pLo2))					 
         {
@@ -341,6 +343,7 @@ public:
 
 	~TriangulationDelaunay()
 	{
+		/*//在View 中是局部变量，会析构，再在ondraw时，会木有，所以不能remove掉
 		mpCandidateNode->RemoveAll();
 		mpCandidateNode2->RemoveAll();
 		mpEdgeList->RemoveAll();
@@ -351,7 +354,7 @@ public:
 		delete mpCandidateNode2;
 		delete mpEdgeList;
 		delete mpNodeList;
-		delete mpTriList;
+		delete mpTriList;*/
 	}
 };
 
