@@ -27,6 +27,7 @@
 #include "Utils.cpp"
 #include "TriangulationDelaunay.cpp"
 
+#include <io.h>
 #pragma region Algorithem Delaunay Global var  Begin
 
 bool bcandraw=true;//能否绘图
@@ -453,6 +454,13 @@ void COpenGLDemoView::OnDestroy()
 	wglDeleteContext(m_hRC);
 	m_hRC=NULL;
 
+	mpNodeList->RemoveAll();
+	mpEdgeList->RemoveAll();
+	mpTriList->RemoveAll();
+
+	delete mpEdgeList;
+	delete mpNodeList;
+	delete mpTriList;
 }
 
 
@@ -794,7 +802,33 @@ void COpenGLDemoView::OnHowtouse()
 
 void COpenGLDemoView::OnFileSaveAs()
 {
-	const char * filename ="testfile.txt";
+	CString strExt = ".txt";                                // 扩展名
+	CString strFilePath;
+	CString strFilter;
+
+	strFilter.Format("Text Files (*txt)|*txt|All Files (*.*)|*.*||");
+	CFileDialog dlg(FALSE, NULL, "", NULL, strFilter);
+	if (!(dlg.DoModal() == IDOK))
+		return;
+	else
+	{
+		strFilePath = dlg.GetPathName();
+		if (strFilePath.Find(strExt) == -1)//查找扩展名，如果没有输入则自动加
+		{
+			strFilePath += strExt;
+		}
+		if (access(strFilePath, 0) == 0 )//需要＃include  <io.h>
+		{
+			CString strQuery;
+			strQuery.Format("%s 已经存在，要替换掉吗？", strFilePath);
+			if ( IDNO == ::MessageBox(m_hWnd, strQuery, "文件覆盖询问", MB_ICONQUESTION | MB_YESNO) )
+			{
+				return;
+			}
+		}
+	}
+	//const char * filename ="testfile.txt";
+	char * filename = (LPSTR)(LPCTSTR)strFilePath;
 	FILE *fp = fopen(filename, "wt+");
 	POSITION pos;
 	CNode node;
@@ -833,7 +867,34 @@ void COpenGLDemoView::OnFileSave()
 
 void COpenGLDemoView::OnFileOpen()
 {
-	const char * filename ="testfile.txt";
+
+	CString strExt = ".txt";                                // 扩展名
+	CString strFilePath;
+	CString strFilter;
+
+	strFilter.Format("Text Files (*txt)|*txt|All Files (*.*)|*.*||");
+	CFileDialog dlg(true, NULL, "", NULL, strFilter);
+	if (!(dlg.DoModal() == IDOK))
+		return;
+	else
+	{
+		strFilePath = dlg.GetPathName();
+		if (strFilePath.Find(strExt) == -1)//查找扩展名，如果没有输入则自动加
+		{
+			strFilePath += strExt;
+		}
+		if (access(strFilePath, 0) == 0 )
+		{
+		}else
+		{
+			CString strQuery;
+			strQuery.Format("%s 不存在？", strFilePath);
+			MessageBox(strQuery);
+		}
+	}
+
+	char * filename = (LPSTR)(LPCTSTR)strFilePath;
+	//const char * filename ="testfile.txt";
 
 	POSITION pos;
 	CNode node;
@@ -872,7 +933,7 @@ void COpenGLDemoView::OnFileOpen()
 		//ensure InnerEnd can be execute
 		if (index == -1 && x == -1 && y == -1 && no_in == -1)
 		{
-			lastNo_in == 6535;
+			lastNo_in = 6535;
 		}
 		if (lastNo_in != no_in)
 		{

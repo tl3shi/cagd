@@ -338,5 +338,20 @@ public:
         fun1();
         return mpTriList;
     }
+
+	~TriangulationDelaunay()
+	{
+		mpCandidateNode->RemoveAll();
+		mpCandidateNode2->RemoveAll();
+		mpEdgeList->RemoveAll();
+		mpNodeList->RemoveAll();
+		mpTriList->RemoveAll();
+
+		delete mpCandidateNode;
+		delete mpCandidateNode2;
+		delete mpEdgeList;
+		delete mpNodeList;
+		delete mpTriList;
+	}
 };
 
