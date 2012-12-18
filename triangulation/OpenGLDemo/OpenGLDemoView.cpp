@@ -565,7 +565,7 @@ void COpenGLDemoView::OnLButtonUp(UINT nFlags, CPoint point)
             
             if (1==waihuan)
             {
-                temp.head=TRUE;
+                //temp.head=TRUE;
             }
 
             if (!mpNodeList->IsEmpty())
@@ -589,7 +589,7 @@ void COpenGLDemoView::OnLButtonUp(UINT nFlags, CPoint point)
             temp.NO_in=curhuan;
             if (TRUE==in_start)
             {
-                temp.head=true;
+                //temp.head=true;
                 in_start=false;
             }
 
@@ -661,7 +661,7 @@ void COpenGLDemoView::OnBtnClickOuterEnd()
         endnode=*(CNode*)mpNodeList->GetNext(pos);
         beginnode=endnode;
     }
-    beginnode.tail=true;
+    //beginnode.tail=true;
   
     ++currentedge;
     edge.index=currentedge;
@@ -759,7 +759,7 @@ void COpenGLDemoView::OnBtnClickInnerEnd()
     }
 
    
-    beginnode.tail=true;
+    //beginnode.tail=true;
 
     ++currentedge;
     edge.index=currentedge;
@@ -981,7 +981,7 @@ void COpenGLDemoView::OnFileOpen()
 						endnode=*(CNode*)mpNodeList->GetNext(pos);
 						beginnode=endnode;
 					}
-					beginnode.tail=true;
+					//beginnode.tail=true;
 
 					++currentedge;
 					edge.index=currentedge;
@@ -1028,7 +1028,7 @@ void COpenGLDemoView::OnFileOpen()
 						}
 					}
 
-					beginnode.tail=true;
+					//beginnode.tail=true;
 
 					++currentedge;
 					edge.index=currentedge;
@@ -1057,7 +1057,7 @@ void COpenGLDemoView::OnFileOpen()
 
 			if (1==waihuan)
 			{
-				temp.head=TRUE;
+				//temp.head=TRUE;
 			}
 
 			if (!mpNodeList->IsEmpty())
@@ -1080,7 +1080,7 @@ void COpenGLDemoView::OnFileOpen()
 			temp.NO_in=curhuan;
 			if (TRUE==in_start)
 			{
-				temp.head=true;
+				//temp.head=true;
 				in_start=false;
 			}
 

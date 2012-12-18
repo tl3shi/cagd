@@ -6,50 +6,50 @@ class CNode:public CObject
 public:
 	int index;//点索引号
 	int x,y;//x，y坐标值
-	//bool out;//内外环
+	bool out;//内外环
 	int NO_in;//内环编号，外环为0，内环从1开始
-	//bool head;//是否环头
-	//bool tail;//是否环尾
+	bool head;//是否环头
+	bool tail;//是否环尾
 public:
 	CNode()
 	{
 		index=0;
 		x=0;
 		y=0;
-		//out=TRUE;
+		out=TRUE;
 		NO_in=0;
-		//head=FALSE;
-		//tail=FALSE;
+		head=FALSE;
+		tail=FALSE;
 	}//零初始化
 	CNode(CNode *temp)
 	{
 		index=temp->index;
 		x=temp->x;
 		y=temp->y;
-		//out=temp->out;
+		out=temp->out;
 		NO_in=temp->NO_in;
-		//head=temp->head;
-		//tail=temp->tail;
+		head=temp->head;
+		tail=temp->tail;
 	}
 	CNode(CNode &n)
 	{
 		index=n.index;
 		x=n.x;
 		y=n.y;
-		//out=n.out;
+		out=n.out;
 		NO_in=n.NO_in;
-		//head=n.head;
-		//tail=n.tail;
+		head=n.head;
+		tail=n.tail;
 	}
 	CNode& operator =(CNode n)
 	{
 		index=n.index;
 		x=n.x;
 		y=n.y;
-		//out=n.out;
+		out=n.out;
 		NO_in=n.NO_in;
-		//head=n.head;
-		//tail=n.tail;
+		head=n.head;
+		tail=n.tail;
 		return *this;
 	}
 #ifdef _DEBUG
