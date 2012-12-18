@@ -561,7 +561,7 @@ void COpenGLDemoView::OnLButtonUp(UINT nFlags, CPoint point)
             temp.index=waihuan;
             temp.x=point.x;
             temp.y=point.y;
-            temp.out=TRUE;
+            //temp.out=TRUE;
             
             if (1==waihuan)
             {
@@ -585,7 +585,7 @@ void COpenGLDemoView::OnLButtonUp(UINT nFlags, CPoint point)
             temp.index=waihuan+neihuan;
             temp.x=point.x;
             temp.y=point.y;
-            temp.out=FALSE;
+            //temp.out=FALSE;
             temp.NO_in=curhuan;
             if (TRUE==in_start)
             {
@@ -794,6 +794,8 @@ void COpenGLDemoView::OnHowtouse()
                4、点击按钮(PolygonOK)完成多边形的输入; \n \
                5、点击按钮(Begin)开始Delaunay三角剖分; \n \
                6、Redraw重新绘制新的多边形; \n \
+               *\"另存为/保存\"菜单下可以将绘制的多边形保存至指定文件;\n \
+               *\"打开\"菜单下可以选择载入已经保存的多边形文件;\n \
                *\"功能\"菜单下可以选择是否填充剖分后的三角形;\n \
                *\"帮助\"菜单下可以再次出现此帮助; \
                ");
@@ -1051,7 +1053,7 @@ void COpenGLDemoView::OnFileOpen()
 			temp.index=waihuan;
 			temp.x=x;
 			temp.y=y;
-			temp.out=TRUE;
+			//temp.out=TRUE;
 
 			if (1==waihuan)
 			{
@@ -1074,7 +1076,7 @@ void COpenGLDemoView::OnFileOpen()
 			temp.index=waihuan+neihuan;
 			temp.x=x;
 			temp.y=y;
-			temp.out=FALSE;
+			//temp.out=FALSE;
 			temp.NO_in=curhuan;
 			if (TRUE==in_start)
 			{

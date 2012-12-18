@@ -179,7 +179,7 @@ public:
         findedge(k,pLk);
         findnode(pLk,pLk1,pLk2);
 
-        for (t=1;t<=N;t++)                  //从第三条边开始检查，除去第1，2，N，k，k+1条边
+        for (t=1;t<=N;t++) //从第三条边开始检查，除去第1，2，N，k，k+1条边
         {
             if ((t!=k) && (t!=k+1))
             {
